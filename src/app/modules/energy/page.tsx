@@ -28,7 +28,10 @@ import {
   Scale,
   DollarSign,
   AlertTriangle,
+  Menu,
+  X,
 } from "lucide-react";
+import { useIsMobile, useIsTablet } from "@/hooks/useMediaQuery";
 import {
   LineChart,
   Line,
@@ -65,10 +68,14 @@ import {
 const COLORS = ["#00D4AA", "#F1C40F", "#3498DB", "#E74C3C", "#9B59B6", "#2ECC71"];
 
 export default function EnergyPage() {
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+  
   const [selectedCompany, setSelectedCompany] = useState<EnergyCompany | null>(energyCompanies[0]);
   const [activeTab, setActiveTab] = useState<"overview" | "plants" | "agents" | "market">("overview");
   const [selectedPlant, setSelectedPlant] = useState<PowerPlant | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<EnergyAgent | null>(null);
+  const [showMobileCompanyList, setShowMobileCompanyList] = useState(false);
 
   // Global stats
   const globalStats = useMemo(() => {
@@ -160,36 +167,36 @@ export default function EnergyPage() {
 
     return (
       <div>
-        <p style={{ color: "#B8C5D3", fontSize: "14px", lineHeight: "1.7", marginBottom: "24px" }}>
+        <p style={{ color: "#B8C5D3", fontSize: isMobile ? "12px" : "14px", lineHeight: "1.7", marginBottom: isMobile ? "16px" : "24px" }}>
           {selectedCompany.description}
         </p>
 
         {/* Key Metrics */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "16px", marginBottom: "24px" }}>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>Total Capacity</div>
-            <div style={{ color: "white", fontSize: "20px", fontWeight: "700" }}>{selectedCompany.totalCapacityMW.toLocaleString()} MW</div>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(3, 1fr)" : "repeat(5, 1fr)", gap: isMobile ? "10px" : "16px", marginBottom: isMobile ? "16px" : "24px" }}>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>Total Capacity</div>
+            <div style={{ color: "white", fontSize: isMobile ? "16px" : "20px", fontWeight: "700" }}>{selectedCompany.totalCapacityMW.toLocaleString()} MW</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>Renewable Energy</div>
-            <div style={{ color: "#2ECC71", fontSize: "20px", fontWeight: "700" }}>{selectedCompany.renewablePercent}%</div>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>Renewable Energy</div>
+            <div style={{ color: "#2ECC71", fontSize: isMobile ? "16px" : "20px", fontWeight: "700" }}>{selectedCompany.renewablePercent}%</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>Grid Reliability</div>
-            <div style={{ color: "#F1C40F", fontSize: "20px", fontWeight: "700" }}>{selectedCompany.avgGridReliability}%</div>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>Grid Reliability</div>
+            <div style={{ color: "#F1C40F", fontSize: isMobile ? "16px" : "20px", fontWeight: "700" }}>{selectedCompany.avgGridReliability}%</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>Peak Demand</div>
-            <div style={{ color: "#3498DB", fontSize: "20px", fontWeight: "700" }}>{selectedCompany.peakDemandMW.toLocaleString()} MW</div>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>Peak Demand</div>
+            <div style={{ color: "#3498DB", fontSize: isMobile ? "16px" : "20px", fontWeight: "700" }}>{selectedCompany.peakDemandMW.toLocaleString()} MW</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>Annual Revenue</div>
-            <div style={{ color: "#00D4AA", fontSize: "20px", fontWeight: "700" }}>${selectedCompany.annualRevenueB}B</div>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D", display: isMobile ? "none" : "block" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>Annual Revenue</div>
+            <div style={{ color: "#00D4AA", fontSize: isMobile ? "16px" : "20px", fontWeight: "700" }}>${selectedCompany.annualRevenueB}B</div>
           </div>
         </div>
 
         {/* Charts Row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "20px", marginBottom: "24px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1.5fr 1fr", gap: isMobile ? "16px" : "20px", marginBottom: isMobile ? "16px" : "24px" }}>
           {/* Grid Load Chart */}
           <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
             <h4 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "16px" }}>24-Hour Grid Load (MW)</h4>
@@ -256,10 +263,10 @@ export default function EnergyPage() {
     if (!selectedCompany) return null;
 
     return (
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1.2fr", gap: isMobile ? "16px" : "20px" }}>
         {/* Plant List */}
         <div>
-          <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px" }}>
+          <h4 style={{ color: "white", fontSize: isMobile ? "14px" : "15px", fontWeight: "600", marginBottom: isMobile ? "12px" : "16px" }}>
             Power Plants ({selectedCompany.plants.length})
           </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -444,10 +451,10 @@ export default function EnergyPage() {
     if (!selectedCompany) return null;
 
     return (
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1.2fr", gap: isMobile ? "16px" : "20px" }}>
         {/* Agent List */}
         <div>
-          <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px" }}>
+          <h4 style={{ color: "white", fontSize: isMobile ? "14px" : "15px", fontWeight: "600", marginBottom: isMobile ? "12px" : "16px" }}>
             AI Agents ({selectedCompany.agents.length})
           </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -597,7 +604,7 @@ export default function EnergyPage() {
     if (!selectedCompany) return null;
 
     return (
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "16px" : "20px" }}>
         {/* Monthly Generation */}
         <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
           <h4 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "16px" }}>Monthly Generation by Source (GWh)</h4>
@@ -634,7 +641,7 @@ export default function EnergyPage() {
         </div>
 
         {/* Storage Overview */}
-        <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D", gridColumn: "span 2" }}>
+        <div style={{ backgroundColor: "#162032", padding: isMobile ? "16px" : "20px", borderRadius: "12px", border: "1px solid #2A3A4D", gridColumn: isMobile ? "span 1" : "span 2" }}>
           <h4 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "16px" }}>Energy Storage Assets</h4>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px" }}>
             {selectedCompany.storage.map((storage) => {
@@ -694,96 +701,164 @@ export default function EnergyPage() {
     <main style={{ minHeight: "100vh", backgroundColor: "#0A1628" }}>
       {/* Header */}
       <header style={{ position: "sticky", top: 0, zIndex: 50, backgroundColor: "#0A1628", borderBottom: "1px solid #2A3A4D" }}>
-        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "12px 24px" }}>
+        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "10px 12px" : "12px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "16px" }}>
               <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", color: "#B8C5D3", textDecoration: "none" }}>
                 <ArrowLeft size={18} />
-                <span style={{ fontSize: "14px" }}>Back</span>
+                {!isMobile && <span style={{ fontSize: "14px" }}>Back</span>}
               </Link>
-              <div style={{ width: "1px", height: "24px", backgroundColor: "#2A3A4D" }} />
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: "rgba(52, 152, 219, 0.15)", border: "1px solid rgba(52, 152, 219, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Zap size={20} style={{ color: "#3498DB" }} />
+              {!isMobile && <div style={{ width: "1px", height: "24px", backgroundColor: "#2A3A4D" }} />}
+              <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "12px" }}>
+                <div style={{ width: isMobile ? "32px" : "40px", height: isMobile ? "32px" : "40px", borderRadius: "12px", backgroundColor: "rgba(52, 152, 219, 0.15)", border: "1px solid rgba(52, 152, 219, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Zap size={isMobile ? 16 : 20} style={{ color: "#3498DB" }} />
                 </div>
                 <div>
-                  <h1 style={{ fontSize: "18px", fontWeight: "600", color: "white", margin: 0 }}>Energy & Resource Management</h1>
-                  <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0 }}>Grid Operations & Renewable Integration</p>
+                  <h1 style={{ fontSize: isMobile ? "14px" : "18px", fontWeight: "600", color: "white", margin: 0 }}>
+                    {isMobile ? "Energy" : "Energy & Resource Management"}
+                  </h1>
+                  {!isMobile && <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0 }}>Grid Operations & Renewable Integration</p>}
                 </div>
               </div>
             </div>
-            <Link href="/">
-              <Image src="/logo.png" alt="Mission 2050" width={100} height={30} style={{ objectFit: "contain" }} />
-            </Link>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              {isMobile && (
+                <button
+                  onClick={() => setShowMobileCompanyList(!showMobileCompanyList)}
+                  style={{
+                    padding: "8px",
+                    borderRadius: "8px",
+                    backgroundColor: showMobileCompanyList ? "#3498DB" : "#162032",
+                    border: "1px solid #2A3A4D",
+                    color: showMobileCompanyList ? "#0A1628" : "#B8C5D3",
+                    cursor: "pointer"
+                  }}
+                >
+                  {showMobileCompanyList ? <X size={18} /> : <Menu size={18} />}
+                </button>
+              )}
+              {!isMobile && (
+                <Link href="/">
+                  <Image src="/logo.png" alt="Mission 2050" width={100} height={30} style={{ objectFit: "contain" }} />
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
-      <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "24px" }}>
+      {/* Mobile Company Selector */}
+      {isMobile && showMobileCompanyList && (
+        <div style={{
+          position: "fixed",
+          top: "60px",
+          left: 0,
+          right: 0,
+          backgroundColor: "#1A2738",
+          borderBottom: "1px solid #2A3A4D",
+          padding: "12px",
+          zIndex: 40,
+          maxHeight: "60vh",
+          overflowY: "auto"
+        }}>
+          <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Companies</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {energyCompanies.map((company) => (
+              <div
+                key={company.id}
+                onClick={() => {
+                  setSelectedCompany(company);
+                  setSelectedPlant(null);
+                  setSelectedAgent(null);
+                  setShowMobileCompanyList(false);
+                }}
+                style={{
+                  backgroundColor: selectedCompany?.id === company.id ? "rgba(52, 152, 219, 0.1)" : "#162032",
+                  border: `1px solid ${selectedCompany?.id === company.id ? "#3498DB" : "#2A3A4D"}`,
+                  borderRadius: "8px",
+                  padding: "12px",
+                  cursor: "pointer",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "white", fontSize: "13px", fontWeight: "600" }}>{company.name}</span>
+                  <span style={{ color: "#2ECC71", fontSize: "14px", fontWeight: "700" }}>
+                    {company.renewablePercent}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "12px" : "24px" }}>
         {/* Global Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "16px", marginBottom: "24px" }}>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Building2 size={18} style={{ color: "#00D4AA" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Companies</span>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(3, 1fr)" : "repeat(5, 1fr)", gap: isMobile ? "8px" : "16px", marginBottom: isMobile ? "16px" : "24px" }}>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Building2 size={isMobile ? 14 : 18} style={{ color: "#00D4AA" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Companies</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{energyCompanies.length}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{energyCompanies.length}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Factory size={18} style={{ color: "#3498DB" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Power Plants</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Factory size={isMobile ? 14 : 18} style={{ color: "#3498DB" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Power Plants</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{globalStats.totalPlants}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.totalPlants}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Zap size={18} style={{ color: "#F1C40F" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Total Capacity</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D", display: isTablet ? "none" : "block" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Zap size={isMobile ? 14 : 18} style={{ color: "#F1C40F" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Total Capacity</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{(globalStats.totalCapacity / 1000).toFixed(1)}k MW</div>
+            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{(globalStats.totalCapacity / 1000).toFixed(1)}k MW</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Leaf size={18} style={{ color: "#2ECC71" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Avg Renewable</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D", display: isMobile ? "none" : "block" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Leaf size={isMobile ? 14 : 18} style={{ color: "#2ECC71" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Avg Renewable</span>
             </div>
-            <div style={{ color: "#2ECC71", fontSize: "26px", fontWeight: "700" }}>{globalStats.avgRenewable}%</div>
+            <div style={{ color: "#2ECC71", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.avgRenewable}%</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Target size={18} style={{ color: "#00D4AA" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>AI Savings</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D", display: isMobile ? "none" : "block" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Target size={isMobile ? 14 : 18} style={{ color: "#00D4AA" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>AI Savings</span>
             </div>
-            <div style={{ color: "#00D4AA", fontSize: "26px", fontWeight: "700" }}>${globalStats.totalSavings}M</div>
+            <div style={{ color: "#00D4AA", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>${globalStats.totalSavings}M</div>
           </div>
         </div>
 
         {/* Main Layout */}
-        <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: "24px" }}>
-          {/* Company Sidebar */}
-          <div>
-            <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Energy Companies</h3>
-            {renderCompanyList()}
-          </div>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr" : "280px 1fr", gap: isMobile ? "16px" : "24px" }}>
+          {/* Company Sidebar - Hidden on mobile */}
+          {!isMobile && (
+            <div>
+              <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Energy Companies</h3>
+              {renderCompanyList()}
+            </div>
+          )}
 
           {/* Main Content */}
           <div style={{ backgroundColor: "#1A2738", borderRadius: "12px", border: "1px solid #2A3A4D", overflow: "hidden" }}>
             {/* Company Header */}
             {selectedCompany && (
-              <div style={{ padding: "20px 24px", borderBottom: "1px solid #2A3A4D", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ padding: isMobile ? "12px 16px" : "20px 24px", borderBottom: "1px solid #2A3A4D", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: isMobile ? "wrap" : "nowrap", gap: isMobile ? "12px" : "0" }}>
                 <div>
-                  <h2 style={{ color: "white", fontSize: "20px", fontWeight: "700", marginBottom: "4px" }}>{selectedCompany.name}</h2>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ color: "#6B7A8C", fontSize: "13px" }}>{selectedCompany.type}</span>
-                    <span style={{ color: "#2A3A4D" }}>•</span>
-                    <span style={{ color: "#6B7A8C", fontSize: "13px" }}>{selectedCompany.headquarters}</span>
+                  <h2 style={{ color: "white", fontSize: isMobile ? "16px" : "20px", fontWeight: "700", marginBottom: "4px" }}>{selectedCompany.name}</h2>
+                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "12px", flexWrap: "wrap" }}>
+                    <span style={{ color: "#6B7A8C", fontSize: isMobile ? "11px" : "13px" }}>{selectedCompany.type}</span>
+                    {!isMobile && <span style={{ color: "#2A3A4D" }}>•</span>}
+                    {!isMobile && <span style={{ color: "#6B7A8C", fontSize: "13px" }}>{selectedCompany.headquarters}</span>}
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ color: "#6B7A8C", fontSize: "11px" }}>Renewable %</div>
-                    <div style={{ color: selectedCompany.renewablePercent >= 80 ? "#2ECC71" : selectedCompany.renewablePercent >= 50 ? "#F1C40F" : "#E74C3C", fontSize: "20px", fontWeight: "700" }}>
+                    <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px" }}>Renewable %</div>
+                    <div style={{ color: selectedCompany.renewablePercent >= 80 ? "#2ECC71" : selectedCompany.renewablePercent >= 50 ? "#F1C40F" : "#E74C3C", fontSize: isMobile ? "16px" : "20px", fontWeight: "700" }}>
                       {selectedCompany.renewablePercent}%
                     </div>
                   </div>
@@ -792,30 +867,31 @@ export default function EnergyPage() {
             )}
 
             {/* Tabs */}
-            <div style={{ display: "flex", borderBottom: "1px solid #2A3A4D", padding: "0 24px" }}>
+            <div style={{ display: "flex", borderBottom: "1px solid #2A3A4D", padding: isMobile ? "0 8px" : "0 24px", overflowX: "auto" }}>
               {(["overview", "plants", "agents", "market"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   style={{
-                    padding: "14px 20px",
+                    padding: isMobile ? "10px 12px" : "14px 20px",
                     border: "none",
                     borderBottom: activeTab === tab ? "2px solid #00D4AA" : "2px solid transparent",
                     backgroundColor: "transparent",
                     color: activeTab === tab ? "white" : "#6B7A8C",
-                    fontSize: "14px",
+                    fontSize: isMobile ? "12px" : "14px",
                     fontWeight: "500",
                     cursor: "pointer",
                     textTransform: "capitalize",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  {tab === "plants" ? "Power Plants" : tab === "market" ? "Market & Storage" : tab}
+                  {isMobile ? (tab === "plants" ? "Plants" : tab === "market" ? "Market" : tab) : (tab === "plants" ? "Power Plants" : tab === "market" ? "Market & Storage" : tab)}
                 </button>
               ))}
             </div>
 
             {/* Tab Content */}
-            <div style={{ padding: "24px", maxHeight: "calc(100vh - 380px)", overflowY: "auto" }}>
+            <div style={{ padding: isMobile ? "12px" : "24px", maxHeight: isMobile ? "none" : "calc(100vh - 380px)", overflowY: "auto" }}>
               {activeTab === "overview" && renderOverview()}
               {activeTab === "plants" && renderPlants()}
               {activeTab === "agents" && renderAgents()}

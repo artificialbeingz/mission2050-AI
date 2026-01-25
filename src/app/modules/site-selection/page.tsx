@@ -35,7 +35,10 @@ import {
   Droplets,
   Flame,
   Star,
+  Menu,
+  ChevronUp,
 } from "lucide-react";
+import { useIsMobile, useIsTablet } from "@/hooks/useMediaQuery";
 
 import dynamic from "next/dynamic";
 
@@ -72,14 +75,19 @@ type ActiveCategory = SiteCategory;
 type AnySite = MineralDeposit | DataCenterSite | HospitalSite | SolarFarmSite | ManufacturingSite;
 
 export default function SiteSelectionPage() {
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+  
   const [activeCategory, setActiveCategory] = useState<ActiveCategory>("mining");
   const [selectedSite, setSelectedSite] = useState<AnySite | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(!isMobile);
   const [showOntology, setShowOntology] = useState(false);
   const [showHotZones, setShowHotZones] = useState(true);
   const [provinceFilter, setProvinceFilter] = useState<Province[]>([]);
   const [minViability, setMinViability] = useState(0);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showMobileDetails, setShowMobileDetails] = useState(false);
 
   const HOT_THRESHOLD = 80;
 
@@ -167,69 +175,140 @@ export default function SiteSelectionPage() {
     <main style={{ minHeight: "100vh", backgroundColor: "#0A1628" }}>
       {/* Header */}
       <header style={{ position: "sticky", top: 0, zIndex: 50, backgroundColor: "#0A1628", borderBottom: "1px solid #2A3A4D" }}>
-        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "12px 24px" }}>
+        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "10px 12px" : "12px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "16px" }}>
               <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", color: "#B8C5D3", textDecoration: "none" }}>
                 <ArrowLeft size={18} />
-                <span style={{ fontSize: "14px" }}>Back</span>
+                {!isMobile && <span style={{ fontSize: "14px" }}>Back</span>}
               </Link>
-              <div style={{ width: "1px", height: "24px", backgroundColor: "#2A3A4D" }} />
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: `${categoryConfig[activeCategory].color}15`, border: `1px solid ${categoryConfig[activeCategory].color}30` }}>
-                  {(() => { const Icon = getCategoryIcon(activeCategory); return <Icon size={20} style={{ color: categoryConfig[activeCategory].color }} />; })()}
+              {!isMobile && <div style={{ width: "1px", height: "24px", backgroundColor: "#2A3A4D" }} />}
+              <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "12px" }}>
+                <div style={{ 
+                  width: isMobile ? "32px" : "40px", 
+                  height: isMobile ? "32px" : "40px", 
+                  borderRadius: "12px", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center", 
+                  backgroundColor: `${categoryConfig[activeCategory].color}15`, 
+                  border: `1px solid ${categoryConfig[activeCategory].color}30` 
+                }}>
+                  {(() => { const Icon = getCategoryIcon(activeCategory); return <Icon size={isMobile ? 16 : 20} style={{ color: categoryConfig[activeCategory].color }} />; })()}
                 </div>
                 <div>
-                  <h1 style={{ fontSize: "18px", fontWeight: "600", color: "white", margin: 0 }}>Site Selection Intelligence</h1>
-                  <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0 }}>{categoryConfig[activeCategory].description}</p>
+                  <h1 style={{ fontSize: isMobile ? "14px" : "18px", fontWeight: "600", color: "white", margin: 0 }}>
+                    {isMobile ? "Site Selection" : "Site Selection Intelligence"}
+                  </h1>
+                  {!isMobile && <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0 }}>{categoryConfig[activeCategory].description}</p>}
                 </div>
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <button 
-                onClick={() => setShowHotZones(!showHotZones)}
-                style={{ 
-                  display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "8px",
-                  backgroundColor: showHotZones ? "#FF6B35" : "#162032", border: showHotZones ? "1px solid #FF6B35" : "1px solid #2A3A4D",
-                  color: showHotZones ? "white" : "#B8C5D3", fontSize: "13px", cursor: "pointer", fontWeight: showHotZones ? "600" : "400"
-                }}
-              >
-                <Flame size={16} />
-                Hot Zones
-                {hotOpportunities.length > 0 && (
-                  <span style={{ 
-                    backgroundColor: showHotZones ? "rgba(255,255,255,0.2)" : "#FF6B35", 
-                    color: "white", 
-                    padding: "2px 8px", 
-                    borderRadius: "10px", 
-                    fontSize: "11px",
-                    fontWeight: "600"
-                  }}>
-                    {hotOpportunities.length}
-                  </span>
-                )}
-              </button>
-              <button 
-                onClick={() => setShowOntology(!showOntology)}
-                style={{ 
-                  display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "8px",
-                  backgroundColor: showOntology ? "#00D4AA" : "#162032", border: "1px solid #2A3A4D",
-                  color: showOntology ? "white" : "#B8C5D3", fontSize: "13px", cursor: "pointer"
-                }}
-              >
-                <Network size={16} />
-                Ontology
-              </button>
-              <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Image src="/logo.png" alt="Mission 2050" width={100} height={30} style={{ objectFit: "contain" }} />
-              </Link>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "12px" }}>
+              {isMobile ? (
+                <>
+                  <button 
+                    onClick={() => setShowMobileFilters(!showMobileFilters)}
+                    style={{ 
+                      padding: "8px", borderRadius: "8px",
+                      backgroundColor: showMobileFilters ? "#00D4AA" : "#162032", 
+                      border: "1px solid #2A3A4D",
+                      color: showMobileFilters ? "white" : "#B8C5D3", 
+                      cursor: "pointer"
+                    }}
+                  >
+                    <Filter size={18} />
+                  </button>
+                  <button 
+                    onClick={() => setShowHotZones(!showHotZones)}
+                    style={{ 
+                      padding: "8px", borderRadius: "8px",
+                      backgroundColor: showHotZones ? "#FF6B35" : "#162032", 
+                      border: showHotZones ? "1px solid #FF6B35" : "1px solid #2A3A4D",
+                      color: showHotZones ? "white" : "#B8C5D3", 
+                      cursor: "pointer",
+                      position: "relative"
+                    }}
+                  >
+                    <Flame size={18} />
+                    {hotOpportunities.length > 0 && (
+                      <span style={{ 
+                        position: "absolute",
+                        top: "-4px",
+                        right: "-4px",
+                        backgroundColor: "#FF6B35", 
+                        color: "white", 
+                        width: "16px",
+                        height: "16px",
+                        borderRadius: "50%", 
+                        fontSize: "10px",
+                        fontWeight: "600",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      }}>
+                        {hotOpportunities.length}
+                      </span>
+                    )}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => setShowHotZones(!showHotZones)}
+                    style={{ 
+                      display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "8px",
+                      backgroundColor: showHotZones ? "#FF6B35" : "#162032", border: showHotZones ? "1px solid #FF6B35" : "1px solid #2A3A4D",
+                      color: showHotZones ? "white" : "#B8C5D3", fontSize: "13px", cursor: "pointer", fontWeight: showHotZones ? "600" : "400"
+                    }}
+                  >
+                    <Flame size={16} />
+                    Hot Zones
+                    {hotOpportunities.length > 0 && (
+                      <span style={{ 
+                        backgroundColor: showHotZones ? "rgba(255,255,255,0.2)" : "#FF6B35", 
+                        color: "white", 
+                        padding: "2px 8px", 
+                        borderRadius: "10px", 
+                        fontSize: "11px",
+                        fontWeight: "600"
+                      }}>
+                        {hotOpportunities.length}
+                      </span>
+                    )}
+                  </button>
+                  <button 
+                    onClick={() => setShowOntology(!showOntology)}
+                    style={{ 
+                      display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "8px",
+                      backgroundColor: showOntology ? "#00D4AA" : "#162032", border: "1px solid #2A3A4D",
+                      color: showOntology ? "white" : "#B8C5D3", fontSize: "13px", cursor: "pointer"
+                    }}
+                  >
+                    <Network size={16} />
+                    Ontology
+                  </button>
+                  <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Image src="/logo.png" alt="Mission 2050" width={100} height={30} style={{ objectFit: "contain" }} />
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
 
         {/* Category Tabs */}
-        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "0 24px" }}>
-          <div style={{ display: "flex", gap: "4px", borderBottom: "1px solid #2A3A4D", paddingBottom: "0" }}>
+        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "0 8px" : "0 24px" }}>
+          <div style={{ 
+            display: "flex", 
+            gap: "4px", 
+            borderBottom: "1px solid #2A3A4D", 
+            paddingBottom: "0",
+            overflowX: isMobile ? "auto" : "visible",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none"
+          }}>
             {(Object.keys(categoryConfig) as SiteCategory[]).map((cat) => {
               const Icon = getCategoryIcon(cat);
               const isActive = activeCategory === cat;
@@ -238,21 +317,122 @@ export default function SiteSelectionPage() {
                   key={cat}
                   onClick={() => handleCategoryChange(cat)}
                   style={{
-                    display: "flex", alignItems: "center", gap: "8px", padding: "12px 20px",
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: isMobile ? "4px" : "8px", 
+                    padding: isMobile ? "10px 12px" : "12px 20px",
                     backgroundColor: isActive ? "#1A2738" : "transparent",
-                    border: "none", borderBottom: isActive ? `2px solid ${categoryConfig[cat].color}` : "2px solid transparent",
-                    color: isActive ? "white" : "#6B7A8C", fontSize: "13px", fontWeight: "500",
-                    cursor: "pointer", transition: "all 0.2s", marginBottom: "-1px"
+                    border: "none", 
+                    borderBottom: isActive ? `2px solid ${categoryConfig[cat].color}` : "2px solid transparent",
+                    color: isActive ? "white" : "#6B7A8C", 
+                    fontSize: isMobile ? "11px" : "13px", 
+                    fontWeight: "500",
+                    cursor: "pointer", 
+                    transition: "all 0.2s", 
+                    marginBottom: "-1px",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0
                   }}
                 >
-                  <Icon size={16} style={{ color: isActive ? categoryConfig[cat].color : "#6B7A8C" }} />
-                  {categoryConfig[cat].label}
+                  <Icon size={isMobile ? 14 : 16} style={{ color: isActive ? categoryConfig[cat].color : "#6B7A8C" }} />
+                  {isMobile ? categoryConfig[cat].label.split(" ")[0] : categoryConfig[cat].label}
                 </button>
               );
             })}
           </div>
         </div>
       </header>
+
+      {/* Mobile Filters Slide-down */}
+      {isMobile && showMobileFilters && (
+        <div style={{ 
+          position: "fixed", 
+          top: "110px", 
+          left: 0, 
+          right: 0, 
+          backgroundColor: "#1A2738", 
+          borderBottom: "1px solid #2A3A4D",
+          padding: "16px",
+          zIndex: 40,
+          maxHeight: "60vh",
+          overflowY: "auto"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <h3 style={{ color: "white", fontSize: "16px", fontWeight: "600", margin: 0 }}>Filters</h3>
+            <button 
+              onClick={() => setShowMobileFilters(false)}
+              style={{ padding: "6px", borderRadius: "6px", backgroundColor: "#162032", border: "none", cursor: "pointer" }}
+            >
+              <X size={18} style={{ color: "#6B7A8C" }} />
+            </button>
+          </div>
+          
+          {/* Search */}
+          <div style={{ position: "relative", marginBottom: "16px" }}>
+            <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#6B7A8C" }} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={`Search ${categoryConfig[activeCategory].label.toLowerCase()}...`}
+              style={{ width: "100%", padding: "10px 12px 10px 36px", borderRadius: "8px", backgroundColor: "#162032", border: "1px solid #2A3A4D", color: "white", fontSize: "14px" }}
+            />
+          </div>
+
+          {/* Province Filter */}
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ fontSize: "12px", color: "#6B7A8C", fontWeight: "500", display: "block", marginBottom: "8px" }}>Province</label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              {(["ON", "QC", "BC", "AB", "SK", "MB", "NS"] as Province[]).map((prov) => (
+                <button
+                  key={prov}
+                  onClick={() => setProvinceFilter(prev => prev.includes(prov) ? prev.filter(p => p !== prov) : [...prev, prov])}
+                  style={{
+                    padding: "8px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: "500",
+                    backgroundColor: provinceFilter.includes(prov) ? "#00D4AA" : "#162032",
+                    color: provinceFilter.includes(prov) ? "white" : "#B8C5D3",
+                    border: "none", cursor: "pointer"
+                  }}
+                >
+                  {prov}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Viability Score */}
+          <div style={{ marginBottom: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+              <label style={{ fontSize: "12px", color: "#6B7A8C", fontWeight: "500" }}>Min Viability Score</label>
+              <span style={{ fontSize: "12px", color: "#00D4AA", fontWeight: "600" }}>{minViability}</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={minViability}
+              onChange={(e) => setMinViability(parseInt(e.target.value))}
+              style={{ width: "100%" }}
+            />
+          </div>
+
+          {/* Clear & Apply */}
+          <div style={{ display: "flex", gap: "12px" }}>
+            <button
+              onClick={() => { setProvinceFilter([]); setMinViability(0); setSearchQuery(""); }}
+              style={{ flex: 1, padding: "12px", borderRadius: "8px", backgroundColor: "#162032", border: "1px solid #2A3A4D", color: "#B8C5D3", fontSize: "13px", cursor: "pointer" }}
+            >
+              Clear All
+            </button>
+            <button
+              onClick={() => setShowMobileFilters(false)}
+              style={{ flex: 1, padding: "12px", borderRadius: "8px", backgroundColor: "#00D4AA", border: "none", color: "white", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}
+            >
+              Apply ({filteredSites.length})
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Ontology Graph Modal */}
       {showOntology && (
@@ -398,122 +578,153 @@ export default function SiteSelectionPage() {
       )}
 
       {/* Main Content */}
-      <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "20px 24px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "280px 1fr 320px", gap: "20px" }}>
-          {/* Left Sidebar - Filters */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {/* AI Search */}
-            <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", padding: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                <Sparkles size={16} style={{ color: "#00D4AA" }} />
-                <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", margin: 0 }}>AI-Powered Search</h3>
-              </div>
-              <div style={{ position: "relative" }}>
-                <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#6B7A8C" }} />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={`Search ${categoryConfig[activeCategory].label.toLowerCase()}...`}
-                  style={{ width: "100%", padding: "10px 12px 10px 36px", borderRadius: "8px", backgroundColor: "#162032", border: "1px solid #2A3A4D", color: "white", fontSize: "13px" }}
-                />
-              </div>
-            </div>
-
-            {/* Filters */}
-            <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", padding: "16px" }}>
-              <button onClick={() => setShowFilters(!showFilters)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", background: "none", border: "none", cursor: "pointer", marginBottom: showFilters ? "16px" : 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Filter size={16} style={{ color: "#6B7A8C" }} />
-                  <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", margin: 0 }}>Filters</h3>
+      <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "12px" : "20px 24px" }}>
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 280px" : "280px 1fr 320px", 
+          gap: isMobile ? "12px" : "20px" 
+        }}>
+          {/* Left Sidebar - Filters (hidden on mobile, shown in slide-down) */}
+          {!isMobile && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px", order: isTablet ? 2 : 1 }}>
+              {/* AI Search */}
+              <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", padding: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                  <Sparkles size={16} style={{ color: "#00D4AA" }} />
+                  <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", margin: 0 }}>AI-Powered Search</h3>
                 </div>
-                <ChevronDown size={16} style={{ color: "#6B7A8C", transform: showFilters ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
-              </button>
+                <div style={{ position: "relative" }}>
+                  <Search size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#6B7A8C" }} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={`Search ${categoryConfig[activeCategory].label.toLowerCase()}...`}
+                    style={{ width: "100%", padding: "10px 12px 10px 36px", borderRadius: "8px", backgroundColor: "#162032", border: "1px solid #2A3A4D", color: "white", fontSize: "13px" }}
+                  />
+                </div>
+              </div>
 
-              {showFilters && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  {/* Province Filter */}
-                  <div>
-                    <label style={{ fontSize: "11px", color: "#6B7A8C", fontWeight: "500", display: "block", marginBottom: "8px" }}>Province</label>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                      {(["ON", "QC", "BC", "AB", "SK", "MB", "NS"] as Province[]).map((prov) => (
-                        <button
-                          key={prov}
-                          onClick={() => setProvinceFilter(prev => prev.includes(prov) ? prev.filter(p => p !== prov) : [...prev, prov])}
-                          style={{
-                            padding: "6px 10px", borderRadius: "6px", fontSize: "11px", fontWeight: "500",
-                            backgroundColor: provinceFilter.includes(prov) ? "#00D4AA" : "#162032",
-                            color: provinceFilter.includes(prov) ? "white" : "#B8C5D3",
-                            border: "none", cursor: "pointer"
-                          }}
-                        >
-                          {prov}
-                        </button>
-                      ))}
-                    </div>
+              {/* Filters */}
+              <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", padding: "16px" }}>
+                <button onClick={() => setShowFilters(!showFilters)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", background: "none", border: "none", cursor: "pointer", marginBottom: showFilters ? "16px" : 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Filter size={16} style={{ color: "#6B7A8C" }} />
+                    <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", margin: 0 }}>Filters</h3>
                   </div>
+                  <ChevronDown size={16} style={{ color: "#6B7A8C", transform: showFilters ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+                </button>
 
-                  {/* Viability Score */}
-                  <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                      <label style={{ fontSize: "11px", color: "#6B7A8C", fontWeight: "500" }}>Min Viability Score</label>
-                      <span style={{ fontSize: "11px", color: "#00D4AA", fontWeight: "600" }}>{minViability}</span>
+                {showFilters && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    {/* Province Filter */}
+                    <div>
+                      <label style={{ fontSize: "11px", color: "#6B7A8C", fontWeight: "500", display: "block", marginBottom: "8px" }}>Province</label>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                        {(["ON", "QC", "BC", "AB", "SK", "MB", "NS"] as Province[]).map((prov) => (
+                          <button
+                            key={prov}
+                            onClick={() => setProvinceFilter(prev => prev.includes(prov) ? prev.filter(p => p !== prov) : [...prev, prov])}
+                            style={{
+                              padding: "6px 10px", borderRadius: "6px", fontSize: "11px", fontWeight: "500",
+                              backgroundColor: provinceFilter.includes(prov) ? "#00D4AA" : "#162032",
+                              color: provinceFilter.includes(prov) ? "white" : "#B8C5D3",
+                              border: "none", cursor: "pointer"
+                            }}
+                          >
+                            {prov}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={minViability}
-                      onChange={(e) => setMinViability(parseInt(e.target.value))}
-                      style={{ width: "100%" }}
-                    />
+
+                    {/* Viability Score */}
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                        <label style={{ fontSize: "11px", color: "#6B7A8C", fontWeight: "500" }}>Min Viability Score</label>
+                        <span style={{ fontSize: "11px", color: "#00D4AA", fontWeight: "600" }}>{minViability}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={minViability}
+                        onChange={(e) => setMinViability(parseInt(e.target.value))}
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+
+                    {/* Clear Filters */}
+                    <button
+                      onClick={() => { setProvinceFilter([]); setMinViability(0); setSearchQuery(""); }}
+                      style={{ width: "100%", padding: "10px", borderRadius: "8px", backgroundColor: "#162032", border: "1px solid #2A3A4D", color: "#B8C5D3", fontSize: "12px", cursor: "pointer" }}
+                    >
+                      Clear All Filters
+                    </button>
                   </div>
+                )}
+              </div>
 
-                  {/* Clear Filters */}
-                  <button
-                    onClick={() => { setProvinceFilter([]); setMinViability(0); setSearchQuery(""); }}
-                    style={{ width: "100%", padding: "10px", borderRadius: "8px", backgroundColor: "#162032", border: "1px solid #2A3A4D", color: "#B8C5D3", fontSize: "12px", cursor: "pointer" }}
-                  >
-                    Clear All Filters
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Category Stats */}
-            <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", padding: "16px" }}>
-              <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Category Overview</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#162032", borderRadius: "8px" }}>
-                  <span style={{ fontSize: "12px", color: "#6B7A8C" }}>Total Sites</span>
-                  <span style={{ fontSize: "12px", color: "white", fontWeight: "600" }}>{currentSites.length}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#162032", borderRadius: "8px" }}>
-                  <span style={{ fontSize: "12px", color: "#6B7A8C" }}>Filtered</span>
-                  <span style={{ fontSize: "12px", color: "#00D4AA", fontWeight: "600" }}>{filteredSites.length}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#162032", borderRadius: "8px" }}>
-                  <span style={{ fontSize: "12px", color: "#6B7A8C" }}>Avg Viability</span>
-                  <span style={{ fontSize: "12px", color: "white", fontWeight: "600" }}>
-                    {filteredSites.length > 0 ? Math.round(filteredSites.reduce((sum, s) => sum + s.viabilityScore, 0) / filteredSites.length) : 0}
-                  </span>
+              {/* Category Stats */}
+              <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", padding: "16px" }}>
+                <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Category Overview</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#162032", borderRadius: "8px" }}>
+                    <span style={{ fontSize: "12px", color: "#6B7A8C" }}>Total Sites</span>
+                    <span style={{ fontSize: "12px", color: "white", fontWeight: "600" }}>{currentSites.length}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#162032", borderRadius: "8px" }}>
+                    <span style={{ fontSize: "12px", color: "#6B7A8C" }}>Filtered</span>
+                    <span style={{ fontSize: "12px", color: "#00D4AA", fontWeight: "600" }}>{filteredSites.length}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", backgroundColor: "#162032", borderRadius: "8px" }}>
+                    <span style={{ fontSize: "12px", color: "#6B7A8C" }}>Avg Viability</span>
+                    <span style={{ fontSize: "12px", color: "white", fontWeight: "600" }}>
+                      {filteredSites.length > 0 ? Math.round(filteredSites.reduce((sum, s) => sum + s.viabilityScore, 0) / filteredSites.length) : 0}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Mobile Stats Bar */}
+          {isMobile && (
+            <div style={{ 
+              display: "flex", 
+              gap: "8px", 
+              backgroundColor: "#1A2738", 
+              border: "1px solid #2A3A4D", 
+              borderRadius: "10px", 
+              padding: "10px"
+            }}>
+              <div style={{ flex: 1, textAlign: "center", borderRight: "1px solid #2A3A4D" }}>
+                <div style={{ fontSize: "16px", color: "white", fontWeight: "700" }}>{currentSites.length}</div>
+                <div style={{ fontSize: "10px", color: "#6B7A8C" }}>Total</div>
+              </div>
+              <div style={{ flex: 1, textAlign: "center", borderRight: "1px solid #2A3A4D" }}>
+                <div style={{ fontSize: "16px", color: "#00D4AA", fontWeight: "700" }}>{filteredSites.length}</div>
+                <div style={{ fontSize: "10px", color: "#6B7A8C" }}>Filtered</div>
+              </div>
+              <div style={{ flex: 1, textAlign: "center" }}>
+                <div style={{ fontSize: "16px", color: "#FF6B35", fontWeight: "700" }}>{hotOpportunities.length}</div>
+                <div style={{ fontSize: "10px", color: "#6B7A8C" }}>Hot</div>
+              </div>
+            </div>
+          )}
 
           {/* Center - Map and Table */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "12px" : "16px", order: isTablet ? 1 : 2 }}>
             {/* Map */}
             <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", overflow: "hidden" }}>
-              <div style={{ padding: "12px 16px", borderBottom: "1px solid #2A3A4D", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", margin: 0 }}>{categoryConfig[activeCategory].label} Sites</h3>
+              <div style={{ padding: isMobile ? "10px 12px" : "12px 16px", borderBottom: "1px solid #2A3A4D", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h3 style={{ color: "white", fontSize: isMobile ? "13px" : "14px", fontWeight: "600", margin: 0 }}>{categoryConfig[activeCategory].label} Sites</h3>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <span style={{ fontSize: "12px", color: "#6B7A8C" }}>{filteredSites.length} sites</span>
                   <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#00D4AA", animation: "pulse 2s infinite" }} />
                 </div>
               </div>
-              <div style={{ position: "relative", height: "400px", backgroundColor: "#0A1628" }}>
+              <div style={{ position: "relative", height: isMobile ? "280px" : "400px", backgroundColor: "#0A1628" }}>
                 <CanadaMap
                   markers={filteredSites.map((site) => ({
                     id: site.id,
@@ -524,7 +735,10 @@ export default function SiteSelectionPage() {
                     viabilityScore: site.viabilityScore,
                   }))}
                   selectedId={selectedSite?.id || null}
-                  onMarkerClick={handleMarkerClick}
+                  onMarkerClick={(id) => {
+                    handleMarkerClick(id);
+                    if (isMobile) setShowMobileDetails(true);
+                  }}
                   categoryColor={categoryConfig[activeCategory].color}
                   showHotZones={showHotZones}
                 />
@@ -541,50 +755,63 @@ export default function SiteSelectionPage() {
                 overflow: "hidden" 
               }}>
                 <div style={{ 
-                  padding: "16px 20px", 
+                  padding: isMobile ? "12px" : "16px 20px", 
                   borderBottom: "1px solid rgba(255,107,53,0.3)",
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between"
+                  alignItems: isMobile ? "flex-start" : "center",
+                  flexDirection: isMobile ? "column" : "row",
+                  justifyContent: "space-between",
+                  gap: isMobile ? "10px" : "0"
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <div style={{ 
-                      width: "40px", height: "40px", borderRadius: "10px", 
+                      width: isMobile ? "32px" : "40px", 
+                      height: isMobile ? "32px" : "40px", 
+                      borderRadius: "10px", 
                       backgroundColor: "rgba(255,107,53,0.2)", 
-                      display: "flex", alignItems: "center", justifyContent: "center" 
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0
                     }}>
-                      <Flame size={22} style={{ color: "#FF6B35" }} />
+                      <Flame size={isMobile ? 18 : 22} style={{ color: "#FF6B35" }} />
                     </div>
                     <div>
-                      <h3 style={{ color: "#FF6B35", fontSize: "16px", fontWeight: "700", margin: 0 }}>
+                      <h3 style={{ color: "#FF6B35", fontSize: isMobile ? "14px" : "16px", fontWeight: "700", margin: 0 }}>
                         🔥 Hot Opportunities
                       </h3>
-                      <p style={{ color: "#8B9CAD", fontSize: "12px", margin: "2px 0 0 0" }}>
-                        High-viability sites (score ≥ {HOT_THRESHOLD}) recommended for immediate development
+                      <p style={{ color: "#8B9CAD", fontSize: isMobile ? "11px" : "12px", margin: "2px 0 0 0" }}>
+                        {isMobile ? `Score ≥ ${HOT_THRESHOLD}` : `High-viability sites (score ≥ ${HOT_THRESHOLD}) recommended for immediate development`}
                       </p>
                     </div>
                   </div>
                   <div style={{ 
                     backgroundColor: "#FF6B35", 
                     color: "white", 
-                    padding: "6px 14px", 
+                    padding: isMobile ? "4px 12px" : "6px 14px", 
                     borderRadius: "20px",
-                    fontSize: "14px",
+                    fontSize: isMobile ? "12px" : "14px",
                     fontWeight: "700"
                   }}>
                     {hotOpportunities.length} Sites
                   </div>
                 </div>
-                <div style={{ padding: "16px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px" }}>
-                  {hotOpportunities.slice(0, 6).map((site, index) => (
+                <div style={{ 
+                  padding: isMobile ? "12px" : "16px", 
+                  display: "grid", 
+                  gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(280px, 1fr))", 
+                  gap: "12px" 
+                }}>
+                  {hotOpportunities.slice(0, isMobile ? 3 : 6).map((site, index) => (
                     <div
                       key={site.id}
-                      onClick={() => setSelectedSite(site)}
+                      onClick={() => {
+                        setSelectedSite(site);
+                        if (isMobile) setShowMobileDetails(true);
+                      }}
                       style={{
                         backgroundColor: selectedSite?.id === site.id ? "rgba(255,107,53,0.2)" : "rgba(0,0,0,0.2)",
                         border: selectedSite?.id === site.id ? "2px solid #FF6B35" : "1px solid rgba(255,107,53,0.2)",
                         borderRadius: "10px",
-                        padding: "14px",
+                        padding: isMobile ? "12px" : "14px",
                         cursor: "pointer",
                         transition: "all 0.2s ease",
                       }}
@@ -601,22 +828,23 @@ export default function SiteSelectionPage() {
                             alignItems: "center", 
                             justifyContent: "center",
                             fontSize: "11px",
-                            fontWeight: "700"
+                            fontWeight: "700",
+                            flexShrink: 0
                           }}>
                             {index + 1}
                           </span>
-                          <span style={{ color: "white", fontSize: "14px", fontWeight: "600" }}>
-                            {site.name.length > 25 ? site.name.substring(0, 25) + "..." : site.name}
+                          <span style={{ color: "white", fontSize: isMobile ? "13px" : "14px", fontWeight: "600" }}>
+                            {site.name.length > (isMobile ? 20 : 25) ? site.name.substring(0, isMobile ? 20 : 25) + "..." : site.name}
                           </span>
                         </div>
-                        <Star size={16} style={{ color: "#FFD700", fill: "#FFD700" }} />
+                        <Star size={16} style={{ color: "#FFD700", fill: "#FFD700", flexShrink: 0 }} />
                       </div>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
                           <span style={{ 
                             padding: "3px 8px", 
                             borderRadius: "4px", 
-                            fontSize: "11px", 
+                            fontSize: "10px", 
                             backgroundColor: "rgba(255,255,255,0.1)", 
                             color: "#B8C5D3" 
                           }}>
@@ -625,7 +853,7 @@ export default function SiteSelectionPage() {
                           <span style={{ 
                             padding: "3px 8px", 
                             borderRadius: "4px", 
-                            fontSize: "11px", 
+                            fontSize: "10px", 
                             backgroundColor: `${getStageColor((site as any).stage)}20`, 
                             color: getStageColor((site as any).stage)
                           }}>
@@ -638,7 +866,7 @@ export default function SiteSelectionPage() {
                           padding: "4px 10px", 
                           borderRadius: "6px",
                           fontWeight: "700",
-                          fontSize: "15px"
+                          fontSize: isMobile ? "14px" : "15px"
                         }}>
                           {site.viabilityScore}
                         </div>
@@ -646,19 +874,20 @@ export default function SiteSelectionPage() {
                     </div>
                   ))}
                 </div>
-                {hotOpportunities.length > 6 && (
-                  <div style={{ padding: "0 16px 16px", textAlign: "center" }}>
+                {hotOpportunities.length > (isMobile ? 3 : 6) && (
+                  <div style={{ padding: isMobile ? "0 12px 12px" : "0 16px 16px", textAlign: "center" }}>
                     <button
                       onClick={() => setMinViability(HOT_THRESHOLD)}
                       style={{
                         backgroundColor: "transparent",
                         border: "1px solid #FF6B35",
                         color: "#FF6B35",
-                        padding: "10px 24px",
+                        padding: isMobile ? "8px 16px" : "10px 24px",
                         borderRadius: "8px",
-                        fontSize: "13px",
+                        fontSize: isMobile ? "12px" : "13px",
                         fontWeight: "600",
-                        cursor: "pointer"
+                        cursor: "pointer",
+                        width: isMobile ? "100%" : "auto"
                       }}
                     >
                       View All {hotOpportunities.length} Hot Opportunities →
@@ -670,19 +899,19 @@ export default function SiteSelectionPage() {
 
             {/* Data Table */}
             <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", overflow: "hidden" }}>
-              <div style={{ padding: "12px 16px", borderBottom: "1px solid #2A3A4D", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", margin: 0 }}>Site Database</h3>
+              <div style={{ padding: isMobile ? "10px 12px" : "12px 16px", borderBottom: "1px solid #2A3A4D", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <h3 style={{ color: "white", fontSize: isMobile ? "13px" : "14px", fontWeight: "600", margin: 0 }}>Site Database</h3>
                 <span style={{ color: "#6B7A8C", fontSize: "12px" }}>{filteredSites.length} sites</span>
               </div>
-              <div style={{ overflowX: "auto", maxHeight: "300px", overflowY: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <div style={{ overflowX: "auto", maxHeight: isMobile ? "250px" : "300px", overflowY: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: isMobile ? "500px" : "auto" }}>
                   <thead>
                     <tr style={{ backgroundColor: "#162032" }}>
-                      <th style={{ padding: "10px 16px", textAlign: "left", fontSize: "11px", fontWeight: "600", color: "#6B7A8C", textTransform: "uppercase" }}>Project</th>
-                      <th style={{ padding: "10px 16px", textAlign: "left", fontSize: "11px", fontWeight: "600", color: "#6B7A8C", textTransform: "uppercase" }}>Province</th>
-                      <th style={{ padding: "10px 16px", textAlign: "left", fontSize: "11px", fontWeight: "600", color: "#6B7A8C", textTransform: "uppercase" }}>Stage</th>
-                      <th style={{ padding: "10px 16px", textAlign: "left", fontSize: "11px", fontWeight: "600", color: "#6B7A8C", textTransform: "uppercase" }}>Viability</th>
-                      <th style={{ padding: "10px 16px", textAlign: "left", fontSize: "11px", fontWeight: "600", color: "#6B7A8C", textTransform: "uppercase" }}>CAPEX</th>
+                      <th style={{ padding: isMobile ? "8px 10px" : "10px 16px", textAlign: "left", fontSize: isMobile ? "10px" : "11px", fontWeight: "600", color: "#6B7A8C", textTransform: "uppercase", whiteSpace: "nowrap" }}>Project</th>
+                      <th style={{ padding: isMobile ? "8px 10px" : "10px 16px", textAlign: "left", fontSize: isMobile ? "10px" : "11px", fontWeight: "600", color: "#6B7A8C", textTransform: "uppercase", whiteSpace: "nowrap" }}>Province</th>
+                      <th style={{ padding: isMobile ? "8px 10px" : "10px 16px", textAlign: "left", fontSize: isMobile ? "10px" : "11px", fontWeight: "600", color: "#6B7A8C", textTransform: "uppercase", whiteSpace: "nowrap" }}>Stage</th>
+                      <th style={{ padding: isMobile ? "8px 10px" : "10px 16px", textAlign: "left", fontSize: isMobile ? "10px" : "11px", fontWeight: "600", color: "#6B7A8C", textTransform: "uppercase", whiteSpace: "nowrap" }}>Score</th>
+                      {!isMobile && <th style={{ padding: "10px 16px", textAlign: "left", fontSize: "11px", fontWeight: "600", color: "#6B7A8C", textTransform: "uppercase" }}>CAPEX</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -695,24 +924,30 @@ export default function SiteSelectionPage() {
                       return (
                         <tr
                           key={site.id}
-                          onClick={() => setSelectedSite(site)}
+                          onClick={() => {
+                            setSelectedSite(site);
+                            if (isMobile) setShowMobileDetails(true);
+                          }}
                           style={{ 
                             cursor: "pointer", 
                             backgroundColor: isSelected ? "rgba(0, 212, 170, 0.1)" : isHot ? "rgba(255,107,53,0.05)" : "transparent",
                             borderBottom: "1px solid #2A3A4D"
                           }}
                         >
-                          <td style={{ padding: "12px 16px" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <td style={{ padding: isMobile ? "10px" : "12px 16px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px" }}>
                               <div style={{ 
                                 width: "8px", 
                                 height: "8px", 
                                 borderRadius: "50%", 
                                 backgroundColor: isHot ? "#FF6B35" : categoryConfig[activeCategory].color,
-                                boxShadow: isHot ? "0 0 8px #FF6B35" : "none"
+                                boxShadow: isHot ? "0 0 8px #FF6B35" : "none",
+                                flexShrink: 0
                               }} />
-                              <span style={{ color: "white", fontSize: "13px", fontWeight: "500" }}>{site.name}</span>
-                              {isHot && (
+                              <span style={{ color: "white", fontSize: isMobile ? "12px" : "13px", fontWeight: "500" }}>
+                                {isMobile && site.name.length > 15 ? site.name.substring(0, 15) + "..." : site.name}
+                              </span>
+                              {isHot && !isMobile && (
                                 <span style={{ 
                                   display: "inline-flex", 
                                   alignItems: "center", 
@@ -729,24 +964,25 @@ export default function SiteSelectionPage() {
                               )}
                             </div>
                           </td>
-                          <td style={{ padding: "12px 16px", color: "#B8C5D3", fontSize: "13px" }}>{site.province}</td>
-                          <td style={{ padding: "12px 16px" }}>
+                          <td style={{ padding: isMobile ? "10px" : "12px 16px", color: "#B8C5D3", fontSize: isMobile ? "11px" : "13px" }}>{site.province}</td>
+                          <td style={{ padding: isMobile ? "10px" : "12px 16px" }}>
                             <span style={{ 
-                              padding: "4px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: "500",
-                              backgroundColor: `${getStageColor(stage as any)}20`, color: getStageColor(stage as any)
+                              padding: isMobile ? "3px 6px" : "4px 8px", borderRadius: "4px", fontSize: isMobile ? "10px" : "11px", fontWeight: "500",
+                              backgroundColor: `${getStageColor(stage as any)}20`, color: getStageColor(stage as any),
+                              whiteSpace: "nowrap"
                             }}>
                               {getStageLabel(stage as any)}
                             </span>
                           </td>
-                          <td style={{ padding: "12px 16px" }}>
+                          <td style={{ padding: isMobile ? "10px" : "12px 16px" }}>
                             <span style={{ 
-                              padding: "4px 10px", borderRadius: "4px", fontSize: "12px", fontWeight: "600",
+                              padding: isMobile ? "3px 8px" : "4px 10px", borderRadius: "4px", fontSize: isMobile ? "11px" : "12px", fontWeight: "600",
                               backgroundColor: `${getScoreColor(site.viabilityScore)}20`, color: getScoreColor(site.viabilityScore)
                             }}>
                               {site.viabilityScore}
                             </span>
                           </td>
-                          <td style={{ padding: "12px 16px", color: "#B8C5D3", fontSize: "13px" }}>${capex}M</td>
+                          {!isMobile && <td style={{ padding: "12px 16px", color: "#B8C5D3", fontSize: "13px" }}>${capex}M</td>}
                         </tr>
                       );
                     })}
@@ -756,33 +992,34 @@ export default function SiteSelectionPage() {
             </div>
           </div>
 
-          {/* Right Sidebar - Details */}
-          <div>
-            {selectedSite ? (
-              <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", overflow: "hidden" }}>
-                {/* Header */}
-                <div style={{ padding: "16px", borderBottom: "1px solid #2A3A4D" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: categoryConfig[activeCategory].color }} />
-                        <span style={{ 
-                          padding: "3px 8px", borderRadius: "4px", fontSize: "10px", fontWeight: "500",
-                          backgroundColor: `${getStageColor((selectedSite as any).stage || 'opportunity')}20`, 
-                          color: getStageColor((selectedSite as any).stage || 'opportunity')
-                        }}>
-                          {getStageLabel((selectedSite as any).stage || 'opportunity')}
-                        </span>
+          {/* Right Sidebar - Details (hidden on mobile, shown as modal) */}
+          {!isMobile && (
+            <div style={{ order: 3 }}>
+              {selectedSite ? (
+                <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", overflow: "hidden" }}>
+                  {/* Header */}
+                  <div style={{ padding: "16px", borderBottom: "1px solid #2A3A4D" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                          <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: categoryConfig[activeCategory].color }} />
+                          <span style={{ 
+                            padding: "3px 8px", borderRadius: "4px", fontSize: "10px", fontWeight: "500",
+                            backgroundColor: `${getStageColor((selectedSite as any).stage || 'opportunity')}20`, 
+                            color: getStageColor((selectedSite as any).stage || 'opportunity')
+                          }}>
+                            {getStageLabel((selectedSite as any).stage || 'opportunity')}
+                          </span>
+                        </div>
+                        <h2 style={{ color: "white", fontSize: "18px", fontWeight: "600", margin: 0 }}>{selectedSite.name}</h2>
+                        <p style={{ color: "#6B7A8C", fontSize: "12px", margin: "4px 0 0 0" }}>
+                          {(selectedSite as any).region ? `${(selectedSite as any).region}, ` : ""}{getProvinceLabel(selectedSite.province)}
+                        </p>
                       </div>
-                      <h2 style={{ color: "white", fontSize: "18px", fontWeight: "600", margin: 0 }}>{selectedSite.name}</h2>
-                      <p style={{ color: "#6B7A8C", fontSize: "12px", margin: "4px 0 0 0" }}>
-                        {(selectedSite as any).region ? `${(selectedSite as any).region}, ` : ""}{getProvinceLabel(selectedSite.province)}
-                      </p>
+                      <button onClick={() => setSelectedSite(null)} style={{ padding: "6px", borderRadius: "6px", backgroundColor: "#162032", border: "none", cursor: "pointer" }}>
+                        <X size={16} style={{ color: "#6B7A8C" }} />
+                      </button>
                     </div>
-                    <button onClick={() => setSelectedSite(null)} style={{ padding: "6px", borderRadius: "6px", backgroundColor: "#162032", border: "none", cursor: "pointer" }}>
-                      <X size={16} style={{ color: "#6B7A8C" }} />
-                    </button>
-                  </div>
 
                   {/* Viability Score */}
                   <div style={{ marginTop: "16px", padding: "16px", backgroundColor: "#162032", borderRadius: "10px", display: "flex", alignItems: "center", gap: "16px" }}>
@@ -996,18 +1233,143 @@ export default function SiteSelectionPage() {
                   )}
                 </div>
               </div>
-            ) : (
-              <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", padding: "32px", textAlign: "center" }}>
-                <Info size={40} style={{ color: "#3A4A5D", marginBottom: "16px" }} />
-                <h3 style={{ color: "white", fontSize: "16px", fontWeight: "600", marginBottom: "8px" }}>Select a Site</h3>
-                <p style={{ color: "#6B7A8C", fontSize: "13px", margin: 0, lineHeight: "1.5" }}>
-                  Click on a site marker on the map or select from the table to view detailed information
-                </p>
-              </div>
-            )}
-          </div>
+              ) : (
+                <div style={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "12px", padding: "32px", textAlign: "center" }}>
+                  <Info size={40} style={{ color: "#3A4A5D", marginBottom: "16px" }} />
+                  <h3 style={{ color: "white", fontSize: "16px", fontWeight: "600", marginBottom: "8px" }}>Select a Site</h3>
+                  <p style={{ color: "#6B7A8C", fontSize: "13px", margin: 0, lineHeight: "1.5" }}>
+                    Click on a site marker on the map or select from the table to view detailed information
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Mobile Details Modal */}
+      {isMobile && showMobileDetails && selectedSite && (
+        <div style={{ 
+          position: "fixed", 
+          inset: 0, 
+          zIndex: 100, 
+          backgroundColor: "rgba(0,0,0,0.7)",
+          display: "flex",
+          alignItems: "flex-end"
+        }}>
+          <div style={{ 
+            backgroundColor: "#1A2738", 
+            borderRadius: "20px 20px 0 0", 
+            width: "100%",
+            maxHeight: "85vh",
+            overflow: "hidden",
+            animation: "slideUp 0.3s ease-out"
+          }}>
+            {/* Drag Handle */}
+            <div style={{ padding: "12px", display: "flex", justifyContent: "center" }}>
+              <div style={{ width: "40px", height: "4px", backgroundColor: "#3A4A5D", borderRadius: "2px" }} />
+            </div>
+            
+            {/* Header */}
+            <div style={{ padding: "0 16px 16px", borderBottom: "1px solid #2A3A4D" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: categoryConfig[activeCategory].color }} />
+                    <span style={{ 
+                      padding: "3px 8px", borderRadius: "4px", fontSize: "10px", fontWeight: "500",
+                      backgroundColor: `${getStageColor((selectedSite as any).stage || 'opportunity')}20`, 
+                      color: getStageColor((selectedSite as any).stage || 'opportunity')
+                    }}>
+                      {getStageLabel((selectedSite as any).stage || 'opportunity')}
+                    </span>
+                    {selectedSite.viabilityScore >= HOT_THRESHOLD && (
+                      <span style={{ 
+                        display: "flex", alignItems: "center", gap: "3px",
+                        padding: "3px 8px", borderRadius: "4px", fontSize: "10px", fontWeight: "600",
+                        backgroundColor: "rgba(255,107,53,0.2)", color: "#FF6B35" 
+                      }}>
+                        <Flame size={10} /> HOT
+                      </span>
+                    )}
+                  </div>
+                  <h2 style={{ color: "white", fontSize: "16px", fontWeight: "600", margin: 0 }}>{selectedSite.name}</h2>
+                  <p style={{ color: "#6B7A8C", fontSize: "12px", margin: "4px 0 0 0" }}>
+                    {(selectedSite as any).region ? `${(selectedSite as any).region}, ` : ""}{getProvinceLabel(selectedSite.province)}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setShowMobileDetails(false)} 
+                  style={{ padding: "8px", borderRadius: "8px", backgroundColor: "#162032", border: "none", cursor: "pointer" }}
+                >
+                  <X size={20} style={{ color: "#6B7A8C" }} />
+                </button>
+              </div>
+
+              {/* Viability Score */}
+              <div style={{ marginTop: "16px", padding: "12px", backgroundColor: "#162032", borderRadius: "10px", display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ position: "relative", width: "50px", height: "50px" }}>
+                  <svg viewBox="0 0 100 100" style={{ width: "100%", height: "100%", transform: "rotate(-90deg)" }}>
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
+                    <circle
+                      cx="50" cy="50" r="40" fill="none"
+                      stroke={getScoreColor(selectedSite.viabilityScore)}
+                      strokeWidth="8"
+                      strokeDasharray={`${(selectedSite.viabilityScore / 100) * 251} 251`}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <span style={{ fontSize: "14px", fontWeight: "700", color: "white" }}>{selectedSite.viabilityScore}</span>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: "11px", color: "#6B7A8C" }}>Viability Score</div>
+                  <div style={{ fontSize: "14px", fontWeight: "600", color: "white" }}>
+                    {selectedSite.viabilityScore >= 80 ? "High" : selectedSite.viabilityScore >= 60 ? "Medium" : "Low"} Viability
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Scrollable Content */}
+            <div style={{ padding: "16px", maxHeight: "50vh", overflowY: "auto" }}>
+              {/* Description */}
+              {'description' in selectedSite && (
+                <div style={{ marginBottom: "16px" }}>
+                  <h4 style={{ fontSize: "12px", color: "#6B7A8C", fontWeight: "500", marginBottom: "8px" }}>Description</h4>
+                  <p style={{ fontSize: "13px", color: "#B8C5D3", lineHeight: "1.5", margin: 0 }}>{(selectedSite as any).description}</p>
+                </div>
+              )}
+
+              {/* Quick Stats Grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "16px" }}>
+                <div style={{ padding: "10px", backgroundColor: "#162032", borderRadius: "8px" }}>
+                  <div style={{ fontSize: "10px", color: "#6B7A8C" }}>Power Grid</div>
+                  <div style={{ fontSize: "13px", color: "white", fontWeight: "600" }}>{selectedSite.nearestGridKm} km</div>
+                </div>
+                <div style={{ padding: "10px", backgroundColor: "#162032", borderRadius: "8px" }}>
+                  <div style={{ fontSize: "10px", color: "#6B7A8C" }}>Highway</div>
+                  <div style={{ fontSize: "13px", color: "white", fontWeight: "600" }}>{selectedSite.nearestHighwayKm} km</div>
+                </div>
+              </div>
+
+              {/* Owner */}
+              {(selectedSite as any).owner && (
+                <div>
+                  <h4 style={{ fontSize: "12px", color: "#6B7A8C", fontWeight: "500", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <Building2 size={14} style={{ color: "#3498DB" }} />
+                    Owner / Developer
+                  </h4>
+                  <div style={{ padding: "10px 12px", backgroundColor: "#162032", borderRadius: "6px" }}>
+                    <span style={{ fontSize: "13px", color: "white" }}>{(selectedSite as any).owner}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

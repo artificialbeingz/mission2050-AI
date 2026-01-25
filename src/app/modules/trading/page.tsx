@@ -28,7 +28,10 @@ import {
   CheckCircle,
   AlertTriangle,
   Pause,
+  Menu,
+  X,
 } from "lucide-react";
+import { useIsMobile, useIsTablet } from "@/hooks/useMediaQuery";
 import {
   LineChart,
   Line,
@@ -65,11 +68,15 @@ import {
 } from "@/data/aiTrading";
 
 export default function TradingPage() {
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+  
   const [selectedFirm, setSelectedFirm] = useState<TradingFirm | null>(tradingFirms[0]);
   const [activeTab, setActiveTab] = useState<"overview" | "agents" | "gpu" | "markets">("overview");
   const [selectedAgent, setSelectedAgent] = useState<TradingAgent | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<TradingCategory | "all">("all");
   const [selectedAsset, setSelectedAsset] = useState<string>("SHOP.TO");
+  const [showMobileFirmList, setShowMobileFirmList] = useState(false);
 
   // Generate price history for selected asset
   const priceHistory = useMemo(() => {
@@ -191,33 +198,33 @@ export default function TradingPage() {
         </p>
 
         {/* Key Metrics */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "16px", marginBottom: "24px" }}>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>AUM</div>
-            <div style={{ color: "white", fontSize: "22px", fontWeight: "700" }}>${selectedFirm.aum}M</div>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(5, 1fr)", gap: isMobile ? "10px" : "16px", marginBottom: "24px" }}>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>AUM</div>
+            <div style={{ color: "white", fontSize: isMobile ? "16px" : "22px", fontWeight: "700" }}>${selectedFirm.aum}M</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>Daily Volume</div>
-            <div style={{ color: "white", fontSize: "22px", fontWeight: "700" }}>${selectedFirm.totalDailyVolume}M</div>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>Daily Volume</div>
+            <div style={{ color: "white", fontSize: isMobile ? "16px" : "22px", fontWeight: "700" }}>${selectedFirm.totalDailyVolume}M</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>Daily Trades</div>
-            <div style={{ color: "white", fontSize: "22px", fontWeight: "700" }}>{selectedFirm.avgDailyTrades.toLocaleString()}</div>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>Daily Trades</div>
+            <div style={{ color: "white", fontSize: isMobile ? "16px" : "22px", fontWeight: "700" }}>{selectedFirm.avgDailyTrades.toLocaleString()}</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>YTD Return</div>
-            <div style={{ color: selectedFirm.ytdReturn >= 0 ? "#2ECC71" : "#E74C3C", fontSize: "22px", fontWeight: "700" }}>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>YTD Return</div>
+            <div style={{ color: selectedFirm.ytdReturn >= 0 ? "#2ECC71" : "#E74C3C", fontSize: isMobile ? "16px" : "22px", fontWeight: "700" }}>
               {selectedFirm.ytdReturn >= 0 ? "+" : ""}{selectedFirm.ytdReturn}%
             </div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>AI Allocation</div>
-            <div style={{ color: "#00D4AA", fontSize: "22px", fontWeight: "700" }}>{selectedFirm.aiAllocation}%</div>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D", gridColumn: isMobile ? "span 2" : "auto" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>AI Allocation</div>
+            <div style={{ color: "#00D4AA", fontSize: isMobile ? "16px" : "22px", fontWeight: "700" }}>{selectedFirm.aiAllocation}%</div>
           </div>
         </div>
 
         {/* Charts Row */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "20px", marginBottom: "24px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr", gap: isMobile ? "16px" : "20px", marginBottom: "24px" }}>
           {/* Performance Chart */}
           <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
             <h4 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "16px" }}>Monthly Performance vs Benchmark</h4>
@@ -292,10 +299,10 @@ export default function TradingPage() {
     if (!selectedFirm) return null;
 
     return (
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1.2fr", gap: isMobile ? "16px" : "20px" }}>
         {/* Agent List */}
         <div>
-          <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px" }}>
+          <h4 style={{ color: "white", fontSize: isMobile ? "14px" : "15px", fontWeight: "600", marginBottom: "16px" }}>
             Trading Agents ({selectedFirm.agents.length})
           </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -491,39 +498,39 @@ export default function TradingPage() {
     return (
       <div>
         {/* GPU Summary */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "24px" }}>
-          <div style={{ backgroundColor: "#162032", padding: "18px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-              <Cpu size={18} style={{ color: "#00D4AA" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Total GPUs</span>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? "10px" : "16px", marginBottom: "24px" }}>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "18px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Cpu size={isMobile ? 14 : 18} style={{ color: "#00D4AA" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Total GPUs</span>
             </div>
-            <div style={{ color: "white", fontSize: "28px", fontWeight: "700" }}>{gpuSummary.total}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "20px" : "28px", fontWeight: "700" }}>{gpuSummary.total}</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "18px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-              <CheckCircle size={18} style={{ color: "#2ECC71" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Available</span>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "18px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <CheckCircle size={isMobile ? 14 : 18} style={{ color: "#2ECC71" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Available</span>
             </div>
-            <div style={{ color: "#2ECC71", fontSize: "28px", fontWeight: "700" }}>{gpuSummary.available}</div>
+            <div style={{ color: "#2ECC71", fontSize: isMobile ? "20px" : "28px", fontWeight: "700" }}>{gpuSummary.available}</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "18px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-              <Activity size={18} style={{ color: "#3498DB" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Allocated</span>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "18px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Activity size={isMobile ? 14 : 18} style={{ color: "#3498DB" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Allocated</span>
             </div>
-            <div style={{ color: "#3498DB", fontSize: "28px", fontWeight: "700" }}>{gpuSummary.allocated}</div>
+            <div style={{ color: "#3498DB", fontSize: isMobile ? "20px" : "28px", fontWeight: "700" }}>{gpuSummary.allocated}</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "18px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-              <Pause size={18} style={{ color: "#E74C3C" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Maintenance</span>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "18px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Pause size={isMobile ? 14 : 18} style={{ color: "#E74C3C" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Maintenance</span>
             </div>
-            <div style={{ color: "#E74C3C", fontSize: "28px", fontWeight: "700" }}>{gpuSummary.maintenance}</div>
+            <div style={{ color: "#E74C3C", fontSize: isMobile ? "20px" : "28px", fontWeight: "700" }}>{gpuSummary.maintenance}</div>
           </div>
         </div>
 
         {/* Charts Row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "24px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "16px" : "20px", marginBottom: "24px" }}>
           {/* Allocation Pie */}
           <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
             <h4 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "16px" }}>GPU Allocation</h4>
@@ -648,18 +655,18 @@ export default function TradingPage() {
     return (
       <div>
         {/* Category Filter */}
-        <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
+        <div style={{ display: "flex", gap: isMobile ? "8px" : "12px", marginBottom: "20px", flexWrap: "wrap" }}>
           {(["all", "stocks", "commodities"] as const).map((cat) => (
             <button
               key={cat}
               onClick={() => setCategoryFilter(cat)}
               style={{
-                padding: "10px 20px",
+                padding: isMobile ? "8px 14px" : "10px 20px",
                 backgroundColor: categoryFilter === cat ? "#00D4AA" : "#162032",
                 border: "1px solid #2A3A4D",
                 borderRadius: "8px",
                 color: categoryFilter === cat ? "#0A1628" : "#B8C5D3",
-                fontSize: "13px",
+                fontSize: isMobile ? "12px" : "13px",
                 fontWeight: "600",
                 cursor: "pointer",
                 textTransform: "capitalize",
@@ -670,10 +677,10 @@ export default function TradingPage() {
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: "20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1.5fr", gap: isMobile ? "16px" : "20px" }}>
           {/* Asset List */}
           <div>
-            <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px" }}>
+            <h4 style={{ color: "white", fontSize: isMobile ? "14px" : "15px", fontWeight: "600", marginBottom: "16px" }}>
               Market Watch ({filteredAssets.length})
             </h4>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "500px", overflowY: "auto" }}>
@@ -812,119 +819,246 @@ export default function TradingPage() {
     <main style={{ minHeight: "100vh", backgroundColor: "#0A1628" }}>
       {/* Header */}
       <header style={{ position: "sticky", top: 0, zIndex: 50, backgroundColor: "#0A1628", borderBottom: "1px solid #2A3A4D" }}>
-        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "12px 24px" }}>
+        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "10px 12px" : "12px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "16px" }}>
               <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", color: "#B8C5D3", textDecoration: "none" }}>
                 <ArrowLeft size={18} />
-                <span style={{ fontSize: "14px" }}>Back</span>
+                {!isMobile && <span style={{ fontSize: "14px" }}>Back</span>}
               </Link>
-              <div style={{ width: "1px", height: "24px", backgroundColor: "#2A3A4D" }} />
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: "rgba(0, 212, 170, 0.15)", border: "1px solid rgba(0, 212, 170, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <TrendingUp size={20} style={{ color: "#00D4AA" }} />
+              {!isMobile && <div style={{ width: "1px", height: "24px", backgroundColor: "#2A3A4D" }} />}
+              <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "12px" }}>
+                <div style={{ 
+                  width: isMobile ? "32px" : "40px", 
+                  height: isMobile ? "32px" : "40px", 
+                  borderRadius: "12px", 
+                  backgroundColor: "rgba(0, 212, 170, 0.15)", 
+                  border: "1px solid rgba(0, 212, 170, 0.3)", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center" 
+                }}>
+                  <TrendingUp size={isMobile ? 16 : 20} style={{ color: "#00D4AA" }} />
                 </div>
                 <div>
-                  <h1 style={{ fontSize: "18px", fontWeight: "600", color: "white", margin: 0 }}>AI Trading Platform</h1>
-                  <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0 }}>Stocks & Commodities</p>
+                  <h1 style={{ fontSize: isMobile ? "14px" : "18px", fontWeight: "600", color: "white", margin: 0 }}>
+                    {isMobile ? "AI Trading" : "AI Trading Platform"}
+                  </h1>
+                  {!isMobile && <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0 }}>Stocks & Commodities</p>}
                 </div>
               </div>
             </div>
-            <Link href="/">
-              <Image src="/logo.png" alt="Mission 2050" width={100} height={30} style={{ objectFit: "contain" }} />
-            </Link>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              {isMobile && (
+                <button
+                  onClick={() => setShowMobileFirmList(!showMobileFirmList)}
+                  style={{
+                    padding: "8px",
+                    borderRadius: "8px",
+                    backgroundColor: showMobileFirmList ? "#00D4AA" : "#162032",
+                    border: "1px solid #2A3A4D",
+                    color: showMobileFirmList ? "#0A1628" : "#B8C5D3",
+                    cursor: "pointer"
+                  }}
+                >
+                  {showMobileFirmList ? <X size={18} /> : <Menu size={18} />}
+                </button>
+              )}
+              {!isMobile && (
+                <Link href="/">
+                  <Image src="/logo.png" alt="Mission 2050" width={100} height={30} style={{ objectFit: "contain" }} />
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
-      <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "24px" }}>
+      {/* Mobile Firm Selector Dropdown */}
+      {isMobile && showMobileFirmList && (
+        <div style={{
+          position: "fixed",
+          top: "60px",
+          left: 0,
+          right: 0,
+          backgroundColor: "#1A2738",
+          borderBottom: "1px solid #2A3A4D",
+          padding: "12px",
+          zIndex: 40,
+          maxHeight: "60vh",
+          overflowY: "auto"
+        }}>
+          <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Trading Firms</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {tradingFirms.map((firm) => (
+              <div
+                key={firm.id}
+                onClick={() => {
+                  setSelectedFirm(firm);
+                  setSelectedAgent(null);
+                  setShowMobileFirmList(false);
+                }}
+                style={{
+                  backgroundColor: selectedFirm?.id === firm.id ? "rgba(0, 212, 170, 0.1)" : "#162032",
+                  border: `1px solid ${selectedFirm?.id === firm.id ? "#00D4AA" : "#2A3A4D"}`,
+                  borderRadius: "8px",
+                  padding: "12px",
+                  cursor: "pointer",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "white", fontSize: "13px", fontWeight: "600" }}>{firm.name}</span>
+                  <span style={{
+                    color: firm.ytdReturn >= 0 ? "#2ECC71" : "#E74C3C",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                  }}>
+                    {firm.ytdReturn >= 0 ? "+" : ""}{firm.ytdReturn}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "12px" : "24px" }}>
         {/* Global Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "16px", marginBottom: "24px" }}>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Building2 size={18} style={{ color: "#00D4AA" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Trading Firms</span>
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(3, 1fr)" : "repeat(6, 1fr)", 
+          gap: isMobile ? "8px" : "16px", 
+          marginBottom: isMobile ? "16px" : "24px" 
+        }}>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Building2 size={isMobile ? 14 : 18} style={{ color: "#00D4AA" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Trading Firms</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{globalStats.totalFirms}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.totalFirms}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Bot size={18} style={{ color: "#3498DB" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>AI Agents</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Bot size={isMobile ? 14 : 18} style={{ color: "#3498DB" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>AI Agents</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{globalStats.totalAgents}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.totalAgents}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Cpu size={18} style={{ color: "#9B59B6" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Total GPUs</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Cpu size={isMobile ? 14 : 18} style={{ color: "#9B59B6" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Total GPUs</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{globalStats.totalGPUs}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.totalGPUs}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <DollarSign size={18} style={{ color: "#F1C40F" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Total AUM</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <DollarSign size={isMobile ? 14 : 18} style={{ color: "#F1C40F" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Total AUM</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>${(globalStats.totalAUM / 1000).toFixed(1)}B</div>
+            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>${(globalStats.totalAUM / 1000).toFixed(1)}B</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <TrendingUp size={18} style={{ color: "#2ECC71" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Avg YTD Return</span>
-            </div>
-            <div style={{ color: "#2ECC71", fontSize: "26px", fontWeight: "700" }}>+{globalStats.avgYTD}%</div>
-          </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Activity size={18} style={{ color: "#E67E22" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Daily Volume</span>
-            </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>${(globalStats.dailyVolume / 1000).toFixed(2)}B</div>
-          </div>
+          {!isMobile && (
+            <>
+              <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                  <TrendingUp size={18} style={{ color: "#2ECC71" }} />
+                  <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Avg YTD Return</span>
+                </div>
+                <div style={{ color: "#2ECC71", fontSize: "26px", fontWeight: "700" }}>+{globalStats.avgYTD}%</div>
+              </div>
+              <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                  <Activity size={18} style={{ color: "#E67E22" }} />
+                  <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Daily Volume</span>
+                </div>
+                <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>${(globalStats.dailyVolume / 1000).toFixed(2)}B</div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Main Layout */}
-        <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: "24px" }}>
-          {/* Firm Sidebar */}
-          <div>
-            <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Trading Firms</h3>
-            {renderFirmList()}
-          </div>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "280px 1fr", gap: isMobile ? "12px" : "24px" }}>
+          {/* Firm Sidebar - Hidden on mobile, shown as dropdown */}
+          {!isMobile && (
+            <div>
+              <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Trading Firms</h3>
+              {renderFirmList()}
+            </div>
+          )}
 
           {/* Main Content */}
           <div style={{ backgroundColor: "#1A2738", borderRadius: "12px", border: "1px solid #2A3A4D", overflow: "hidden" }}>
+            {/* Mobile Firm Selector */}
+            {isMobile && (
+              <div style={{ padding: "12px 16px", borderBottom: "1px solid #2A3A4D" }}>
+                <select
+                  value={selectedFirm?.id || ""}
+                  onChange={(e) => {
+                    const firm = tradingFirms.find(f => f.id === e.target.value);
+                    if (firm) setSelectedFirm(firm);
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    backgroundColor: "#0D1821",
+                    border: "1px solid #2A3A4D",
+                    borderRadius: "8px",
+                    color: "white",
+                    fontSize: "14px",
+                  }}
+                >
+                  {tradingFirms.map((firm) => (
+                    <option key={firm.id} value={firm.id}>{firm.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
             {/* Firm Header */}
             {selectedFirm && (
-              <div style={{ padding: "20px 24px", borderBottom: "1px solid #2A3A4D", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ 
+                padding: isMobile ? "12px 16px" : "20px 24px", 
+                borderBottom: "1px solid #2A3A4D", 
+                display: "flex", 
+                flexDirection: isMobile ? "column" : "row",
+                justifyContent: "space-between", 
+                alignItems: isMobile ? "flex-start" : "center",
+                gap: isMobile ? "12px" : "0",
+              }}>
                 <div>
-                  <h2 style={{ color: "white", fontSize: "20px", fontWeight: "700", marginBottom: "4px" }}>{selectedFirm.name}</h2>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ color: "#6B7A8C", fontSize: "13px", textTransform: "capitalize" }}>{selectedFirm.type.replace("_", " ")}</span>
+                  <h2 style={{ color: "white", fontSize: isMobile ? "16px" : "20px", fontWeight: "700", marginBottom: "4px" }}>{selectedFirm.name}</h2>
+                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "12px", flexWrap: "wrap" }}>
+                    <span style={{ color: "#6B7A8C", fontSize: isMobile ? "11px" : "13px", textTransform: "capitalize" }}>{selectedFirm.type.replace("_", " ")}</span>
                     <span style={{ color: "#2A3A4D" }}>•</span>
-                    <span style={{ color: "#6B7A8C", fontSize: "13px" }}>{selectedFirm.headquarters}</span>
-                    <span style={{ color: "#2A3A4D" }}>•</span>
-                    <div style={{ display: "flex", gap: "6px" }}>
-                      {selectedFirm.tradingCategories.map((cat) => (
-                        <span key={cat} style={{
-                          padding: "2px 8px",
-                          borderRadius: "4px",
-                          fontSize: "10px",
-                          fontWeight: "600",
-                          backgroundColor: cat === "stocks" ? "rgba(52, 152, 219, 0.15)" : "rgba(230, 126, 34, 0.15)",
-                          color: cat === "stocks" ? "#3498DB" : "#E67E22",
-                          textTransform: "capitalize",
-                        }}>
-                          {cat}
-                        </span>
-                      ))}
-                    </div>
+                    <span style={{ color: "#6B7A8C", fontSize: isMobile ? "11px" : "13px" }}>{selectedFirm.headquarters}</span>
+                    {!isMobile && (
+                      <>
+                        <span style={{ color: "#2A3A4D" }}>•</span>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          {selectedFirm.tradingCategories.map((cat) => (
+                            <span key={cat} style={{
+                              padding: "2px 8px",
+                              borderRadius: "4px",
+                              fontSize: "10px",
+                              fontWeight: "600",
+                              backgroundColor: cat === "stocks" ? "rgba(52, 152, 219, 0.15)" : "rgba(230, 126, 34, 0.15)",
+                              color: cat === "stocks" ? "#3498DB" : "#E67E22",
+                              textTransform: "capitalize",
+                            }}>
+                              {cat}
+                            </span>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <div style={{ textAlign: "right" }}>
+                  <div style={{ textAlign: isMobile ? "left" : "right" }}>
                     <div style={{ color: "#6B7A8C", fontSize: "11px" }}>YTD Return</div>
-                    <div style={{ color: selectedFirm.ytdReturn >= 0 ? "#2ECC71" : "#E74C3C", fontSize: "20px", fontWeight: "700" }}>
+                    <div style={{ color: selectedFirm.ytdReturn >= 0 ? "#2ECC71" : "#E74C3C", fontSize: isMobile ? "16px" : "20px", fontWeight: "700" }}>
                       {selectedFirm.ytdReturn >= 0 ? "+" : ""}{selectedFirm.ytdReturn}%
                     </div>
                   </div>
@@ -933,30 +1067,36 @@ export default function TradingPage() {
             )}
 
             {/* Tabs */}
-            <div style={{ display: "flex", borderBottom: "1px solid #2A3A4D", padding: "0 24px" }}>
+            <div style={{ 
+              display: "flex", 
+              borderBottom: "1px solid #2A3A4D", 
+              padding: isMobile ? "0 8px" : "0 24px",
+              overflowX: isMobile ? "auto" : "visible",
+            }}>
               {(["overview", "agents", "gpu", "markets"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   style={{
-                    padding: "14px 20px",
+                    padding: isMobile ? "10px 12px" : "14px 20px",
                     border: "none",
                     borderBottom: activeTab === tab ? "2px solid #00D4AA" : "2px solid transparent",
                     backgroundColor: "transparent",
                     color: activeTab === tab ? "white" : "#6B7A8C",
-                    fontSize: "14px",
+                    fontSize: isMobile ? "12px" : "14px",
                     fontWeight: "500",
                     cursor: "pointer",
                     textTransform: "capitalize",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  {tab === "gpu" ? "GPU Resources" : tab}
+                  {tab === "gpu" ? (isMobile ? "GPU" : "GPU Resources") : tab}
                 </button>
               ))}
             </div>
 
             {/* Tab Content */}
-            <div style={{ padding: "24px", maxHeight: "calc(100vh - 380px)", overflowY: "auto" }}>
+            <div style={{ padding: isMobile ? "16px" : "24px", maxHeight: isMobile ? "none" : "calc(100vh - 380px)", overflowY: "auto" }}>
               {activeTab === "overview" && renderOverview()}
               {activeTab === "agents" && renderAgents()}
               {activeTab === "gpu" && renderGPU()}

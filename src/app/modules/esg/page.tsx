@@ -26,7 +26,10 @@ import {
   Network,
   Award,
   Globe,
+  Menu,
+  X,
 } from "lucide-react";
+import { useIsMobile, useIsTablet } from "@/hooks/useMediaQuery";
 import {
   LineChart,
   Line,
@@ -67,10 +70,14 @@ import {
 } from "@/data/esgData";
 
 export default function ESGPage() {
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+  
   const [selectedCompany, setSelectedCompany] = useState<ESGCompany | null>(esgCompanies[0]);
   const [activeTab, setActiveTab] = useState<"overview" | "sites" | "agents" | "ontology" | "frameworks">("overview");
   const [selectedSite, setSelectedSite] = useState<ESGSite | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<ESGAgent | null>(null);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   // Global stats
   const globalStats = useMemo(() => {
@@ -183,39 +190,39 @@ export default function ESGPage() {
         </p>
 
         {/* Key Metrics */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "16px", marginBottom: "24px" }}>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>Overall ESG Score</div>
-            <div style={{ color: "#00D4AA", fontSize: "24px", fontWeight: "700" }}>{selectedCompany.overallESGScore}</div>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(5, 1fr)", gap: isMobile ? "10px" : "16px", marginBottom: isMobile ? "16px" : "24px" }}>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>Overall ESG</div>
+            <div style={{ color: "#00D4AA", fontSize: isMobile ? "20px" : "24px", fontWeight: "700" }}>{selectedCompany.overallESGScore}</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>ESG Rating</div>
-            <div style={{ color: ratingConfig[selectedCompany.esgRating]?.color, fontSize: "24px", fontWeight: "700" }}>{selectedCompany.esgRating}</div>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>ESG Rating</div>
+            <div style={{ color: ratingConfig[selectedCompany.esgRating]?.color, fontSize: isMobile ? "20px" : "24px", fontWeight: "700" }}>{selectedCompany.esgRating}</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>Total Employees</div>
-            <div style={{ color: "white", fontSize: "24px", fontWeight: "700" }}>{selectedCompany.totalEmployees.toLocaleString()}</div>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>Employees</div>
+            <div style={{ color: "white", fontSize: isMobile ? "20px" : "24px", fontWeight: "700" }}>{selectedCompany.totalEmployees.toLocaleString()}</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>Carbon Neutral</div>
-            <div style={{ color: "#2ECC71", fontSize: "24px", fontWeight: "700" }}>{selectedCompany.carbonNeutralTarget}</div>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>Carbon Neutral</div>
+            <div style={{ color: "#2ECC71", fontSize: isMobile ? "20px" : "24px", fontWeight: "700" }}>{selectedCompany.carbonNeutralTarget}</div>
           </div>
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "6px" }}>Frameworks</div>
-            <div style={{ color: "#3498DB", fontSize: "24px", fontWeight: "700" }}>{selectedCompany.frameworks.length}</div>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "12px" : "16px", borderRadius: "10px", border: "1px solid #2A3A4D", gridColumn: isMobile ? "span 2" : "auto" }}>
+            <div style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "11px", marginBottom: "6px" }}>Frameworks</div>
+            <div style={{ color: "#3498DB", fontSize: isMobile ? "20px" : "24px", fontWeight: "700" }}>{selectedCompany.frameworks.length}</div>
           </div>
         </div>
 
         {/* Charts Row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "20px", marginBottom: "24px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: isMobile ? "16px" : "20px", marginBottom: isMobile ? "16px" : "24px" }}>
           {/* ESG Radar */}
-          <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <h4 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "16px" }}>ESG Score Breakdown</h4>
-            <ResponsiveContainer width="100%" height={200}>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "14px" : "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <h4 style={{ color: "white", fontSize: isMobile ? "13px" : "14px", fontWeight: "600", marginBottom: "16px" }}>ESG Score Breakdown</h4>
+            <ResponsiveContainer width="100%" height={isMobile ? 180 : 200}>
               <RadarChart data={radarData}>
                 <PolarGrid stroke="#2A3A4D" />
-                <PolarAngleAxis dataKey="category" stroke="#6B7A8C" fontSize={11} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#2A3A4D" fontSize={10} />
+                <PolarAngleAxis dataKey="category" stroke="#6B7A8C" fontSize={isMobile ? 10 : 11} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#2A3A4D" fontSize={isMobile ? 9 : 10} />
                 <Radar name="Score" dataKey="score" stroke="#00D4AA" fill="#00D4AA" fillOpacity={0.5} />
                 <Tooltip contentStyle={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "8px" }} />
               </RadarChart>
@@ -223,13 +230,13 @@ export default function ESGPage() {
           </div>
 
           {/* ESG Score Trend */}
-          <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <h4 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "16px" }}>Score Trend (6 Months)</h4>
-            <ResponsiveContainer width="100%" height={200}>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "14px" : "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <h4 style={{ color: "white", fontSize: isMobile ? "13px" : "14px", fontWeight: "600", marginBottom: "16px" }}>Score Trend (6 Months)</h4>
+            <ResponsiveContainer width="100%" height={isMobile ? 180 : 200}>
               <LineChart data={esgScoreTrendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#2A3A4D" />
-                <XAxis dataKey="month" stroke="#6B7A8C" fontSize={11} />
-                <YAxis domain={[60, 100]} stroke="#6B7A8C" fontSize={11} />
+                <XAxis dataKey="month" stroke="#6B7A8C" fontSize={isMobile ? 10 : 11} />
+                <YAxis domain={[60, 100]} stroke="#6B7A8C" fontSize={isMobile ? 10 : 11} />
                 <Tooltip contentStyle={{ backgroundColor: "#1A2738", border: "1px solid #2A3A4D", borderRadius: "8px" }} />
                 <Legend />
                 <Line type="monotone" dataKey="environmental" name="E" stroke="#2ECC71" strokeWidth={2} dot={{ fill: "#2ECC71" }} />
@@ -240,9 +247,9 @@ export default function ESGPage() {
           </div>
 
           {/* Metrics Status */}
-          <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <h4 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "16px" }}>Metrics Status</h4>
-            <ResponsiveContainer width="100%" height={200}>
+          <div style={{ backgroundColor: "#162032", padding: isMobile ? "14px" : "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <h4 style={{ color: "white", fontSize: isMobile ? "13px" : "14px", fontWeight: "600", marginBottom: "16px" }}>Metrics Status</h4>
+            <ResponsiveContainer width="100%" height={isMobile ? 180 : 200}>
               <PieChart>
                 <Pie
                   data={statusPieData}
@@ -882,96 +889,146 @@ export default function ESGPage() {
     <main style={{ minHeight: "100vh", backgroundColor: "#0A1628" }}>
       {/* Header */}
       <header style={{ position: "sticky", top: 0, zIndex: 50, backgroundColor: "#0A1628", borderBottom: "1px solid #2A3A4D" }}>
-        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "12px 24px" }}>
+        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "10px 12px" : "12px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "10px" : "16px" }}>
               <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", color: "#B8C5D3", textDecoration: "none" }}>
-                <ArrowLeft size={18} />
-                <span style={{ fontSize: "14px" }}>Back</span>
+                <ArrowLeft size={isMobile ? 16 : 18} />
+                {!isMobile && <span style={{ fontSize: "14px" }}>Back</span>}
               </Link>
-              <div style={{ width: "1px", height: "24px", backgroundColor: "#2A3A4D" }} />
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: "rgba(46, 204, 113, 0.15)", border: "1px solid rgba(46, 204, 113, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Leaf size={20} style={{ color: "#2ECC71" }} />
+              {!isMobile && <div style={{ width: "1px", height: "24px", backgroundColor: "#2A3A4D" }} />}
+              <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "12px" }}>
+                <div style={{ width: isMobile ? "32px" : "40px", height: isMobile ? "32px" : "40px", borderRadius: "12px", backgroundColor: "rgba(46, 204, 113, 0.15)", border: "1px solid rgba(46, 204, 113, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Leaf size={isMobile ? 16 : 20} style={{ color: "#2ECC71" }} />
                 </div>
                 <div>
-                  <h1 style={{ fontSize: "18px", fontWeight: "600", color: "white", margin: 0 }}>ESG Ontology & Reporting</h1>
-                  <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0 }}>Unified ESG Framework Management</p>
+                  <h1 style={{ fontSize: isMobile ? "14px" : "18px", fontWeight: "600", color: "white", margin: 0 }}>
+                    {isMobile ? "ESG Reporting" : "ESG Ontology & Reporting"}
+                  </h1>
+                  {!isMobile && <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0 }}>Unified ESG Framework Management</p>}
                 </div>
               </div>
             </div>
-            <Link href="/">
-              <Image src="/logo.png" alt="Mission 2050" width={100} height={30} style={{ objectFit: "contain" }} />
-            </Link>
+            {!isMobile && (
+              <Link href="/">
+                <Image src="/logo.png" alt="Mission 2050" width={100} height={30} style={{ objectFit: "contain" }} />
+              </Link>
+            )}
           </div>
         </div>
       </header>
 
-      <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "24px" }}>
+      <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "12px" : "24px" }}>
         {/* Global Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "16px", marginBottom: "24px" }}>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Building2 size={18} style={{ color: "#00D4AA" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Companies</span>
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(3, 1fr)" : "repeat(5, 1fr)", 
+          gap: isMobile ? "10px" : "16px", 
+          marginBottom: isMobile ? "16px" : "24px" 
+        }}>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "14px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: isMobile ? "8px" : "10px" }}>
+              <Building2 size={isMobile ? 16 : 18} style={{ color: "#00D4AA" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "11px" : "12px" }}>Companies</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{esgCompanies.length}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "22px" : "26px", fontWeight: "700" }}>{esgCompanies.length}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Award size={18} style={{ color: "#2ECC71" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Avg ESG Score</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "14px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: isMobile ? "8px" : "10px" }}>
+              <Award size={isMobile ? 16 : 18} style={{ color: "#2ECC71" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "11px" : "12px" }}>Avg ESG</span>
             </div>
-            <div style={{ color: "#2ECC71", fontSize: "26px", fontWeight: "700" }}>{globalStats.avgESG}</div>
+            <div style={{ color: "#2ECC71", fontSize: isMobile ? "22px" : "26px", fontWeight: "700" }}>{globalStats.avgESG}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Factory size={18} style={{ color: "#3498DB" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Total Sites</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "14px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: isMobile ? "8px" : "10px" }}>
+              <Factory size={isMobile ? 16 : 18} style={{ color: "#3498DB" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "11px" : "12px" }}>Sites</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{globalStats.totalSites}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "22px" : "26px", fontWeight: "700" }}>{globalStats.totalSites}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Globe size={18} style={{ color: "#F1C40F" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Frameworks</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "14px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: isMobile ? "8px" : "10px" }}>
+              <Globe size={isMobile ? 16 : 18} style={{ color: "#F1C40F" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "11px" : "12px" }}>Frameworks</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{globalStats.totalFrameworks}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "22px" : "26px", fontWeight: "700" }}>{globalStats.totalFrameworks}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Bot size={18} style={{ color: "#9B59B6" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>AI Agents</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "14px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D", gridColumn: isMobile ? "span 2" : "auto" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: isMobile ? "8px" : "10px" }}>
+              <Bot size={isMobile ? 16 : 18} style={{ color: "#9B59B6" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "11px" : "12px" }}>AI Agents</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{globalStats.totalAgents}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "22px" : "26px", fontWeight: "700" }}>{globalStats.totalAgents}</div>
           </div>
         </div>
 
-        {/* Main Layout */}
-        <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: "24px" }}>
-          {/* Company Sidebar */}
-          <div>
-            <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Companies</h3>
-            {renderCompanyList()}
+        {/* Mobile Company Selector */}
+        {isMobile && (
+          <div style={{ marginBottom: "16px" }}>
+            <select
+              value={selectedCompany?.id || ""}
+              onChange={(e) => {
+                const company = esgCompanies.find(c => c.id === e.target.value);
+                setSelectedCompany(company || null);
+                setSelectedSite(null);
+                setSelectedAgent(null);
+              }}
+              style={{
+                width: "100%",
+                padding: "14px",
+                backgroundColor: "#1A2738",
+                border: "1px solid #00D4AA",
+                borderRadius: "10px",
+                color: "white",
+                fontSize: "14px",
+                outline: "none",
+              }}
+            >
+              {esgCompanies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.name} - Rating: {company.esgRating}
+                </option>
+              ))}
+            </select>
           </div>
+        )}
+
+        {/* Main Layout */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr" : "280px 1fr", gap: isMobile ? "16px" : "24px" }}>
+          {/* Company Sidebar - Desktop/Tablet only */}
+          {!isMobile && (
+            <div>
+              <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Companies</h3>
+              {renderCompanyList()}
+            </div>
+          )}
 
           {/* Main Content */}
           <div style={{ backgroundColor: "#1A2738", borderRadius: "12px", border: "1px solid #2A3A4D", overflow: "hidden" }}>
             {/* Company Header */}
             {selectedCompany && (
-              <div style={{ padding: "20px 24px", borderBottom: "1px solid #2A3A4D", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ 
+                padding: isMobile ? "14px" : "20px 24px", 
+                borderBottom: "1px solid #2A3A4D", 
+                display: "flex", 
+                justifyContent: "space-between", 
+                alignItems: isMobile ? "flex-start" : "center",
+                flexDirection: isMobile ? "column" : "row",
+                gap: isMobile ? "12px" : "0",
+              }}>
                 <div>
-                  <h2 style={{ color: "white", fontSize: "20px", fontWeight: "700", marginBottom: "4px" }}>{selectedCompany.name}</h2>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ color: "#6B7A8C", fontSize: "13px" }}>{selectedCompany.industry}</span>
+                  <h2 style={{ color: "white", fontSize: isMobile ? "16px" : "20px", fontWeight: "700", marginBottom: "4px" }}>{selectedCompany.name}</h2>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                    <span style={{ color: "#6B7A8C", fontSize: isMobile ? "12px" : "13px" }}>{selectedCompany.industry}</span>
                     <span style={{ color: "#2A3A4D" }}>•</span>
-                    <span style={{ color: "#6B7A8C", fontSize: "13px" }}>{selectedCompany.headquarters}</span>
+                    <span style={{ color: "#6B7A8C", fontSize: isMobile ? "12px" : "13px" }}>{selectedCompany.headquarters}</span>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <div style={{ textAlign: "right" }}>
+                  <div style={{ textAlign: isMobile ? "left" : "right" }}>
                     <div style={{ color: "#6B7A8C", fontSize: "11px" }}>ESG Rating</div>
-                    <div style={{ color: ratingConfig[selectedCompany.esgRating]?.color, fontSize: "24px", fontWeight: "700" }}>
+                    <div style={{ color: ratingConfig[selectedCompany.esgRating]?.color, fontSize: isMobile ? "20px" : "24px", fontWeight: "700" }}>
                       {selectedCompany.esgRating}
                     </div>
                   </div>
@@ -980,30 +1037,38 @@ export default function ESGPage() {
             )}
 
             {/* Tabs */}
-            <div style={{ display: "flex", borderBottom: "1px solid #2A3A4D", padding: "0 24px" }}>
+            <div style={{ 
+              display: "flex", 
+              borderBottom: "1px solid #2A3A4D", 
+              padding: isMobile ? "0 12px" : "0 24px",
+              overflowX: isMobile ? "auto" : "visible",
+              WebkitOverflowScrolling: "touch",
+            }}>
               {(["overview", "sites", "agents", "ontology", "frameworks"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   style={{
-                    padding: "14px 20px",
+                    padding: isMobile ? "10px 12px" : "14px 20px",
                     border: "none",
                     borderBottom: activeTab === tab ? "2px solid #00D4AA" : "2px solid transparent",
                     backgroundColor: "transparent",
                     color: activeTab === tab ? "white" : "#6B7A8C",
-                    fontSize: "14px",
+                    fontSize: isMobile ? "12px" : "14px",
                     fontWeight: "500",
                     cursor: "pointer",
                     textTransform: "capitalize",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
                   }}
                 >
-                  {tab === "ontology" ? "Ontology Graph" : tab}
+                  {isMobile ? (tab === "ontology" ? "Ontology" : tab) : (tab === "ontology" ? "Ontology Graph" : tab)}
                 </button>
               ))}
             </div>
 
             {/* Tab Content */}
-            <div style={{ padding: "24px", maxHeight: "calc(100vh - 380px)", overflowY: "auto" }}>
+            <div style={{ padding: isMobile ? "16px" : "24px", maxHeight: isMobile ? "none" : "calc(100vh - 380px)", overflowY: isMobile ? "visible" : "auto" }}>
               {activeTab === "overview" && renderOverview()}
               {activeTab === "sites" && renderSites()}
               {activeTab === "agents" && renderAgents()}

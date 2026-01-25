@@ -28,7 +28,10 @@ import {
   DollarSign,
   AlertCircle,
   Timer,
+  Menu,
+  X,
 } from "lucide-react";
+import { useIsMobile, useIsTablet } from "@/hooks/useMediaQuery";
 import {
   LineChart,
   Line,
@@ -67,11 +70,15 @@ import {
 const COLORS = ["#00D4AA", "#F1C40F", "#3498DB", "#E74C3C", "#9B59B6", "#2ECC71"];
 
 export default function MaintenancePage() {
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+  
   const [selectedCompany, setSelectedCompany] = useState<MaintenanceCompany | null>(maintenanceCompanies[0]);
   const [activeTab, setActiveTab] = useState<"overview" | "sites" | "agents" | "predictions">("overview");
   const [selectedSite, setSelectedSite] = useState<MaintenanceSite | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<MaintenanceAgent | null>(null);
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+  const [showMobileCompanyList, setShowMobileCompanyList] = useState(false);
 
   // Global stats
   const globalStats = useMemo(() => {
@@ -871,54 +878,125 @@ export default function MaintenancePage() {
     <main style={{ minHeight: "100vh", backgroundColor: "#0A1628" }}>
       {/* Header */}
       <header style={{ position: "sticky", top: 0, zIndex: 50, backgroundColor: "#0A1628", borderBottom: "1px solid #2A3A4D" }}>
-        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "12px 24px" }}>
+        <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "10px 12px" : "12px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "16px" }}>
               <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", color: "#B8C5D3", textDecoration: "none" }}>
                 <ArrowLeft size={18} />
-                <span style={{ fontSize: "14px" }}>Back</span>
+                {!isMobile && <span style={{ fontSize: "14px" }}>Back</span>}
               </Link>
-              <div style={{ width: "1px", height: "24px", backgroundColor: "#2A3A4D" }} />
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: "rgba(230, 126, 34, 0.15)", border: "1px solid rgba(230, 126, 34, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Wrench size={20} style={{ color: "#E67E22" }} />
+              {!isMobile && <div style={{ width: "1px", height: "24px", backgroundColor: "#2A3A4D" }} />}
+              <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "12px" }}>
+                <div style={{ width: isMobile ? "32px" : "40px", height: isMobile ? "32px" : "40px", borderRadius: "12px", backgroundColor: "rgba(230, 126, 34, 0.15)", border: "1px solid rgba(230, 126, 34, 0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Wrench size={isMobile ? 16 : 20} style={{ color: "#E67E22" }} />
                 </div>
                 <div>
-                  <h1 style={{ fontSize: "18px", fontWeight: "600", color: "white", margin: 0 }}>Predictive Maintenance</h1>
-                  <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0 }}>AI-Powered Asset Health & Failure Prediction</p>
+                  <h1 style={{ fontSize: isMobile ? "14px" : "18px", fontWeight: "600", color: "white", margin: 0 }}>
+                    {isMobile ? "Maintenance" : "Predictive Maintenance"}
+                  </h1>
+                  {!isMobile && <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0 }}>AI-Powered Asset Health & Failure Prediction</p>}
                 </div>
               </div>
             </div>
-            <Link href="/">
-              <Image src="/logo.png" alt="Mission 2050" width={100} height={30} style={{ objectFit: "contain" }} />
-            </Link>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              {isMobile && (
+                <button
+                  onClick={() => setShowMobileCompanyList(!showMobileCompanyList)}
+                  style={{
+                    padding: "8px",
+                    borderRadius: "8px",
+                    backgroundColor: showMobileCompanyList ? "#E67E22" : "#162032",
+                    border: "1px solid #2A3A4D",
+                    color: showMobileCompanyList ? "#0A1628" : "#B8C5D3",
+                    cursor: "pointer"
+                  }}
+                >
+                  {showMobileCompanyList ? <X size={18} /> : <Menu size={18} />}
+                </button>
+              )}
+              {!isMobile && (
+                <Link href="/">
+                  <Image src="/logo.png" alt="Mission 2050" width={100} height={30} style={{ objectFit: "contain" }} />
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
-      <div style={{ maxWidth: "1800px", margin: "0 auto", padding: "24px" }}>
+      {/* Mobile Company Selector */}
+      {isMobile && showMobileCompanyList && (
+        <div style={{
+          position: "fixed",
+          top: "60px",
+          left: 0,
+          right: 0,
+          backgroundColor: "#1A2738",
+          borderBottom: "1px solid #2A3A4D",
+          padding: "12px",
+          zIndex: 40,
+          maxHeight: "60vh",
+          overflowY: "auto"
+        }}>
+          <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Companies</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {maintenanceCompanies.map((company) => (
+              <div
+                key={company.id}
+                onClick={() => {
+                  setSelectedCompany(company);
+                  setSelectedSite(null);
+                  setSelectedAgent(null);
+                  setSelectedEquipment(null);
+                  setShowMobileCompanyList(false);
+                }}
+                style={{
+                  backgroundColor: selectedCompany?.id === company.id ? "rgba(230, 126, 34, 0.1)" : "#162032",
+                  border: `1px solid ${selectedCompany?.id === company.id ? "#E67E22" : "#2A3A4D"}`,
+                  borderRadius: "8px",
+                  padding: "12px",
+                  cursor: "pointer",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "white", fontSize: "13px", fontWeight: "600" }}>{company.name}</span>
+                  <span style={{
+                    color: company.avgHealthScore >= 90 ? "#2ECC71" : company.avgHealthScore >= 70 ? "#F1C40F" : "#E74C3C",
+                    fontSize: "14px",
+                    fontWeight: "700",
+                  }}>
+                    {company.avgHealthScore}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "12px" : "24px" }}>
         {/* Global Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "16px", marginBottom: "24px" }}>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Building2 size={18} style={{ color: "#00D4AA" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Companies</span>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(3, 1fr)" : "repeat(6, 1fr)", gap: isMobile ? "8px" : "16px", marginBottom: isMobile ? "16px" : "24px" }}>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Building2 size={isMobile ? 14 : 18} style={{ color: "#00D4AA" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Companies</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{maintenanceCompanies.length}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{maintenanceCompanies.length}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Factory size={18} style={{ color: "#3498DB" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Total Sites</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Factory size={isMobile ? 14 : 18} style={{ color: "#3498DB" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Total Sites</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{globalStats.totalSites}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.totalSites}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <Cog size={18} style={{ color: "#F1C40F" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Total Equipment</span>
+          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <Cog size={isMobile ? 14 : 18} style={{ color: "#F1C40F" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Total Equipment</span>
             </div>
-            <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{globalStats.totalEquipment.toLocaleString()}</div>
+            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.totalEquipment.toLocaleString()}</div>
           </div>
           <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
@@ -928,46 +1006,89 @@ export default function MaintenancePage() {
             <div style={{ color: "#2ECC71", fontSize: "26px", fontWeight: "700" }}>{globalStats.avgHealthScore}%</div>
           </div>
           <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <AlertTriangle size={18} style={{ color: "#E74C3C" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Active Alerts</span>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
+              <AlertTriangle size={isMobile ? 14 : 18} style={{ color: "#E74C3C" }} />
+              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Active Alerts</span>
             </div>
-            <div style={{ color: "#E74C3C", fontSize: "26px", fontWeight: "700" }}>{globalStats.totalAlerts}</div>
+            <div style={{ color: "#E74C3C", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.totalAlerts}</div>
           </div>
-          <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-              <DollarSign size={18} style={{ color: "#00D4AA" }} />
-              <span style={{ color: "#6B7A8C", fontSize: "12px" }}>AI Savings</span>
+          {!isMobile && (
+            <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                <DollarSign size={18} style={{ color: "#00D4AA" }} />
+                <span style={{ color: "#6B7A8C", fontSize: "12px" }}>AI Savings</span>
+              </div>
+              <div style={{ color: "#00D4AA", fontSize: "26px", fontWeight: "700" }}>${globalStats.totalSavings}M</div>
             </div>
-            <div style={{ color: "#00D4AA", fontSize: "26px", fontWeight: "700" }}>${globalStats.totalSavings}M</div>
-          </div>
+          )}
         </div>
 
         {/* Main Layout */}
-        <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: "24px" }}>
-          {/* Company Sidebar */}
-          <div>
-            <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Companies</h3>
-            {renderCompanyList()}
-          </div>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "280px 1fr", gap: isMobile ? "12px" : "24px" }}>
+          {/* Company Sidebar - Hidden on mobile */}
+          {!isMobile && (
+            <div>
+              <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Companies</h3>
+              {renderCompanyList()}
+            </div>
+          )}
 
           {/* Main Content */}
           <div style={{ backgroundColor: "#1A2738", borderRadius: "12px", border: "1px solid #2A3A4D", overflow: "hidden" }}>
+            {/* Mobile Company Selector */}
+            {isMobile && (
+              <div style={{ padding: "12px 16px", borderBottom: "1px solid #2A3A4D" }}>
+                <select
+                  value={selectedCompany?.id || ""}
+                  onChange={(e) => {
+                    const company = maintenanceCompanies.find(c => c.id === e.target.value);
+                    if (company) {
+                      setSelectedCompany(company);
+                      setSelectedSite(null);
+                      setSelectedAgent(null);
+                      setSelectedEquipment(null);
+                    }
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    backgroundColor: "#0D1821",
+                    border: "1px solid #2A3A4D",
+                    borderRadius: "8px",
+                    color: "white",
+                    fontSize: "14px",
+                  }}
+                >
+                  {maintenanceCompanies.map((company) => (
+                    <option key={company.id} value={company.id}>{company.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
             {/* Company Header */}
             {selectedCompany && (
-              <div style={{ padding: "20px 24px", borderBottom: "1px solid #2A3A4D", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ 
+                padding: isMobile ? "12px 16px" : "20px 24px", 
+                borderBottom: "1px solid #2A3A4D", 
+                display: "flex", 
+                flexDirection: isMobile ? "column" : "row",
+                justifyContent: "space-between", 
+                alignItems: isMobile ? "flex-start" : "center",
+                gap: isMobile ? "12px" : "0",
+              }}>
                 <div>
-                  <h2 style={{ color: "white", fontSize: "20px", fontWeight: "700", marginBottom: "4px" }}>{selectedCompany.name}</h2>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ color: "#6B7A8C", fontSize: "13px" }}>{selectedCompany.industry}</span>
+                  <h2 style={{ color: "white", fontSize: isMobile ? "16px" : "20px", fontWeight: "700", marginBottom: "4px" }}>{selectedCompany.name}</h2>
+                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "12px", flexWrap: "wrap" }}>
+                    <span style={{ color: "#6B7A8C", fontSize: isMobile ? "11px" : "13px" }}>{selectedCompany.industry}</span>
                     <span style={{ color: "#2A3A4D" }}>•</span>
-                    <span style={{ color: "#6B7A8C", fontSize: "13px" }}>{selectedCompany.headquarters}</span>
+                    <span style={{ color: "#6B7A8C", fontSize: isMobile ? "11px" : "13px" }}>{selectedCompany.headquarters}</span>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <div style={{ textAlign: "right" }}>
+                  <div style={{ textAlign: isMobile ? "left" : "right" }}>
                     <div style={{ color: "#6B7A8C", fontSize: "11px" }}>Health Score</div>
-                    <div style={{ color: selectedCompany.avgHealthScore >= 90 ? "#2ECC71" : selectedCompany.avgHealthScore >= 80 ? "#F1C40F" : "#E74C3C", fontSize: "20px", fontWeight: "700" }}>
+                    <div style={{ color: selectedCompany.avgHealthScore >= 90 ? "#2ECC71" : selectedCompany.avgHealthScore >= 80 ? "#F1C40F" : "#E74C3C", fontSize: isMobile ? "16px" : "20px", fontWeight: "700" }}>
                       {selectedCompany.avgHealthScore}%
                     </div>
                   </div>
@@ -976,30 +1097,36 @@ export default function MaintenancePage() {
             )}
 
             {/* Tabs */}
-            <div style={{ display: "flex", borderBottom: "1px solid #2A3A4D", padding: "0 24px" }}>
+            <div style={{ 
+              display: "flex", 
+              borderBottom: "1px solid #2A3A4D", 
+              padding: isMobile ? "0 8px" : "0 24px",
+              overflowX: isMobile ? "auto" : "visible",
+            }}>
               {(["overview", "sites", "agents", "predictions"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   style={{
-                    padding: "14px 20px",
+                    padding: isMobile ? "10px 12px" : "14px 20px",
                     border: "none",
                     borderBottom: activeTab === tab ? "2px solid #00D4AA" : "2px solid transparent",
                     backgroundColor: "transparent",
                     color: activeTab === tab ? "white" : "#6B7A8C",
-                    fontSize: "14px",
+                    fontSize: isMobile ? "12px" : "14px",
                     fontWeight: "500",
                     cursor: "pointer",
                     textTransform: "capitalize",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  {tab === "predictions" ? "Alerts & Predictions" : tab}
+                  {tab === "predictions" ? (isMobile ? "Alerts" : "Alerts & Predictions") : tab}
                 </button>
               ))}
             </div>
 
             {/* Tab Content */}
-            <div style={{ padding: "24px", maxHeight: "calc(100vh - 380px)", overflowY: "auto" }}>
+            <div style={{ padding: isMobile ? "16px" : "24px", maxHeight: isMobile ? "none" : "calc(100vh - 380px)", overflowY: "auto" }}>
               {activeTab === "overview" && renderOverview()}
               {activeTab === "sites" && renderSites()}
               {activeTab === "agents" && renderAgents()}
