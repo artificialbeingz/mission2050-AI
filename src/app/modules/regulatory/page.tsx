@@ -63,6 +63,9 @@ import {
   likelihoodConfig,
   RiskCategory,
   CompanyRiskProfile,
+  Risk,
+  RiskSeverity,
+  RiskLikelihood,
 } from "@/data/riskManagement";
 
 export default function RegulatoryPage() {
@@ -70,11 +73,13 @@ export default function RegulatoryPage() {
   const isTablet = useIsTablet();
 
   const [selectedCompany, setSelectedCompany] = useState<ComplianceCompany | null>(complianceCompanies[0]);
-  const [activeTab, setActiveTab] = useState<"overview" | "risks" | "agents" | "processes" | "frameworks">("overview");
+  const [activeTab, setActiveTab] = useState<"risks" | "agents" | "processes" | "frameworks" | "summary">("risks");
   const [selectedAgent, setSelectedAgent] = useState<ComplianceAgent | null>(null);
   const [selectedProcess, setSelectedProcess] = useState<DownstreamProcess | null>(null);
   const [expandedProcess, setExpandedProcess] = useState<string | null>(null);
   const [showMobileCompanyList, setShowMobileCompanyList] = useState(false);
+  const [hoveredCell, setHoveredCell] = useState<{ likelihood: RiskLikelihood; severity: RiskSeverity; category: RiskCategory } | null>(null);
+  const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
 
   // Global stats
   const globalStats = useMemo(() => {
@@ -259,13 +264,27 @@ export default function RegulatoryPage() {
 
   const renderAgents = () => {
     if (!selectedCompany) return null;
+    
+    // Key ML models for predictive maintenance and risk management
+    const predictiveMaintenanceModels = [
+      { name: "RiskPredict-XL", type: "Predictive Risk Scoring", accuracy: 96.8, description: "Predicts risk likelihood and impact using historical patterns" },
+      { name: "AnomalyDetect-Pro", type: "Anomaly Detection", accuracy: 94.5, description: "Identifies unusual patterns in compliance and operational data" },
+      { name: "TrendForecast-AI", type: "Time Series Forecasting", accuracy: 92.3, description: "Forecasts risk trends and compliance gaps over time" },
+      { name: "FailurePredict-ML", type: "Failure Prediction", accuracy: 95.1, description: "Predicts system and process failures before they occur" },
+      { name: "SentimentNLP-v3", type: "NLP Sentiment Analysis", accuracy: 91.7, description: "Analyzes regulatory documents and communications" },
+      { name: "ClusterRisk-AI", type: "Risk Clustering", accuracy: 89.4, description: "Groups similar risks for efficient mitigation strategies" },
+    ];
+    
     return (
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "16px" : "20px" }}>
-        {/* Agent List */}
-        <div>
-          <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px" }}>
-            AI Compliance Agents ({selectedCompany.agents.length})
-          </h4>
+      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        {/* Agents Section */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "16px" : "20px" }}>
+          {/* Agent List */}
+          <div>
+            <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+              <Bot size={18} style={{ color: "#9B59B6" }} />
+              AI Compliance Agents ({selectedCompany.agents.length})
+            </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {selectedCompany.agents.map((agent) => {
               const AgentIcon = getAgentIcon(agent.type);
@@ -428,6 +447,44 @@ export default function RegulatoryPage() {
               <p style={{ fontSize: "14px" }}>Select an agent to view details</p>
             </div>
           )}
+        </div>
+        </div>
+
+        {/* ML Models Section */}
+        <div style={{ backgroundColor: "#162032", borderRadius: "12px", border: "1px solid #2A3A4D", padding: "20px" }}>
+          <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+            <BarChart3 size={18} style={{ color: "#F1C40F" }} />
+            Predictive Maintenance Models ({predictiveMaintenanceModels.length})
+          </h4>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: "12px" }}>
+            {predictiveMaintenanceModels.map((model, idx) => (
+              <div
+                key={idx}
+                style={{
+                  backgroundColor: "#0A1628",
+                  border: "1px solid #2A3A4D",
+                  borderRadius: "10px",
+                  padding: "14px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "8px" }}>
+                  <h5 style={{ color: "#F1C40F", fontSize: "13px", fontWeight: "600", margin: 0 }}>{model.name}</h5>
+                  <span style={{ 
+                    padding: "2px 8px", 
+                    borderRadius: "4px", 
+                    fontSize: "10px", 
+                    fontWeight: "600",
+                    backgroundColor: "rgba(46, 204, 113, 0.15)",
+                    color: "#2ECC71"
+                  }}>
+                    {model.accuracy}%
+                  </span>
+                </div>
+                <span style={{ color: "#3498DB", fontSize: "11px", fontWeight: "500", display: "block", marginBottom: "6px" }}>{model.type}</span>
+                <span style={{ color: "#6B7A8C", fontSize: "11px", lineHeight: "1.4" }}>{model.description}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -669,78 +726,80 @@ export default function RegulatoryPage() {
     const likelihoods: Array<keyof typeof likelihoodConfig> = ['likely', 'medium', 'high', 'extreme'];
 
     // Build heat map grid
-    const getHeatMapCount = (likelihood: string, severity: string): number => {
-      const cell = riskProfile.heatMapData.find(
+    const getHeatMapCell = (likelihood: string, severity: string) => {
+      return riskProfile.heatMapData.find(
         c => c.likelihood === likelihood && c.severity === severity
       );
-      return cell?.count || 0;
     };
 
     return (
       <div>
         {/* Top Row: Summary Cards + Heat Map */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "280px 1fr", gap: "20px", marginBottom: "20px" }}>
-          {/* Left Column: Summary Cards + Risk Categories */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "220px 1fr", gap: "12px", marginBottom: "12px" }}>
+          {/* Left Column: Summary Cards */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             {/* Total Risks Card */}
-            <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-              <div style={{ color: "#6B7A8C", fontSize: "12px", marginBottom: "8px" }}>Total Risks</div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "10px", backgroundColor: "rgba(52, 152, 219, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Shield size={20} style={{ color: "#3498DB" }} />
-                </div>
+            <div style={{ backgroundColor: "#162032", padding: "12px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div>
-                  <span style={{ color: "white", fontSize: "28px", fontWeight: "700" }}>{riskProfile.activeRisks}</span>
-                  <span style={{ color: "#6B7A8C", fontSize: "14px", marginLeft: "6px" }}>Active</span>
+                  <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "4px" }}>Total Active Risks</div>
+                  <span style={{ color: "white", fontSize: "24px", fontWeight: "700" }}>{riskProfile.activeRisks}</span>
+                </div>
+                <div style={{ width: "36px", height: "36px", borderRadius: "8px", backgroundColor: "rgba(52, 152, 219, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Shield size={18} style={{ color: "#3498DB" }} />
                 </div>
               </div>
             </div>
 
             {/* High & Critical Risks Card */}
-            <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-              <div style={{ color: "#6B7A8C", fontSize: "12px", marginBottom: "8px" }}>High & Critical Risks</div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "10px", backgroundColor: "rgba(231, 76, 60, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <AlertTriangle size={20} style={{ color: "#E74C3C" }} />
-                </div>
+            <div style={{ backgroundColor: "#162032", padding: "12px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div>
-                  <span style={{ color: "#E74C3C", fontSize: "28px", fontWeight: "700" }}>{riskProfile.highCriticalRisks}</span>
+                  <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "4px" }}>High & Critical</div>
+                  <span style={{ color: "#E74C3C", fontSize: "24px", fontWeight: "700" }}>{riskProfile.highCriticalRisks}</span>
+                  <span style={{ color: "#E74C3C", fontSize: "11px", marginLeft: "6px" }}>({riskProfile.criticalRisks} critical)</span>
                 </div>
-              </div>
-              <div style={{ marginTop: "8px", color: "#E74C3C", fontSize: "12px" }}>
-                • {riskProfile.criticalRisks} Critical Risks
+                <div style={{ width: "36px", height: "36px", borderRadius: "8px", backgroundColor: "rgba(231, 76, 60, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <AlertTriangle size={18} style={{ color: "#E74C3C" }} />
+                </div>
               </div>
             </div>
 
-            {/* Top Risk Categories */}
-            <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "12px", border: "1px solid #2A3A4D", flex: 1 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                <span style={{ color: "white", fontSize: "14px", fontWeight: "600" }}>Top Risk Categories</span>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {/* Top Risk Categories - All Categories */}
+            <div style={{ backgroundColor: "#162032", padding: "12px", borderRadius: "10px", border: "1px solid #2A3A4D", flex: 1 }}>
+              <div style={{ color: "white", fontSize: "12px", fontWeight: "600", marginBottom: "8px" }}>Risk by Category</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 {(Object.entries(riskProfile.risksByCategory) as [RiskCategory, { count: number; high: number; critical: number }][])
-                  .filter(([_, data]) => data.count > 0)
                   .sort((a, b) => b[1].count - a[1].count)
                   .map(([category, data]) => {
                     const config = riskCategoryConfig[category];
-                    const Icon = getRiskCategoryIcon(category);
                     return (
-                      <div key={category} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #2A3A4D" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <Icon size={16} style={{ color: config.color }} />
-                          <span style={{ color: "#B8C5D3", fontSize: "13px" }}>{config.label}</span>
+                      <div key={category} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "3px 0" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: "20px",
+                            height: "20px",
+                            borderRadius: "4px",
+                            backgroundColor: `${config.color}20`,
+                            color: config.color,
+                            fontSize: "9px",
+                            fontWeight: "700",
+                          }}>
+                            {config.abbr}
+                          </span>
+                          <span style={{ color: data.count > 0 ? "#B8C5D3" : "#6B7A8C", fontSize: "10px" }}>{config.label}</span>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <span style={{ color: "white", fontSize: "14px", fontWeight: "600" }}>{data.count}</span>
-                          {data.critical > 0 && (
-                            <span style={{ padding: "2px 6px", borderRadius: "4px", backgroundColor: "rgba(231, 76, 60, 0.15)", color: "#E74C3C", fontSize: "10px", fontWeight: "600" }}>
-                              {data.critical}
+                        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                          <span style={{ color: data.count > 0 ? "white" : "#6B7A8C", fontSize: "12px", fontWeight: "600", minWidth: "16px", textAlign: "right" }}>{data.count}</span>
+                          {(data.critical > 0 || data.high > 0) ? (
+                            <span style={{ padding: "2px 4px", borderRadius: "4px", backgroundColor: "rgba(231, 76, 60, 0.15)", color: "#E74C3C", fontSize: "9px", fontWeight: "600", minWidth: "18px", textAlign: "center" }}>
+                              {data.critical + data.high}
                             </span>
-                          )}
-                          {data.high > 0 && (
-                            <span style={{ padding: "2px 6px", borderRadius: "4px", backgroundColor: "rgba(230, 126, 34, 0.15)", color: "#E67E22", fontSize: "10px", fontWeight: "600" }}>
-                              {data.high}
-                            </span>
+                          ) : (
+                            <span style={{ minWidth: "18px" }}></span>
                           )}
                         </div>
                       </div>
@@ -751,13 +810,13 @@ export default function RegulatoryPage() {
           </div>
 
           {/* Right Column: Heat Map */}
-          <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "20px" }}>Risk Heat Map</h4>
-            <div style={{ display: "grid", gridTemplateColumns: "80px repeat(5, 1fr)", gap: "4px" }}>
+          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D", display: "flex", flexDirection: "column" }}>
+            <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "12px" }}>Risk Heat Map</h4>
+            <div style={{ display: "grid", gridTemplateColumns: "70px repeat(5, 1fr)", gap: "6px", flex: 1 }}>
               {/* Header row */}
               <div></div>
               {severities.map((severity) => (
-                <div key={severity} style={{ textAlign: "center", color: "#6B7A8C", fontSize: "10px", padding: "8px 4px" }}>
+                <div key={severity} style={{ textAlign: "center", color: "#6B7A8C", fontSize: "10px", padding: "6px 4px", fontWeight: "500" }}>
                   {severityConfig[severity].label}
                 </div>
               ))}
@@ -765,29 +824,204 @@ export default function RegulatoryPage() {
               {/* Data rows */}
               {likelihoods.slice().reverse().map((likelihood) => (
                 <>
-                  <div key={`label-${likelihood}`} style={{ display: "flex", alignItems: "center", color: "#6B7A8C", fontSize: "11px", paddingRight: "8px" }}>
+                  <div key={`label-${likelihood}`} style={{ display: "flex", alignItems: "center", color: "#6B7A8C", fontSize: "11px", paddingRight: "8px", fontWeight: "500" }}>
                     {likelihoodConfig[likelihood].label}
                   </div>
                   {severities.map((severity) => {
-                    const count = getHeatMapCount(likelihood, severity);
-                    const cellColor = getHeatMapCellColor(likelihood, severity);
+                    const cellData = getHeatMapCell(likelihood, severity);
+                    // Determine if this is a High or Critical risk cell
+                    // Critical = extreme + severe
+                    // High = (extreme + major) OR (high + major)
+                    const isCritical = likelihood === 'extreme' && severity === 'severe';
+                    const isHigh = (likelihood === 'extreme' && severity === 'major') || 
+                                   (likelihood === 'high' && severity === 'major');
+                    
+                    // Color: Red for critical/high, otherwise use severity color
+                    let cellColor = severityConfig[severity].color;
+                    if (isCritical) {
+                      cellColor = '#DC2626'; // Bright red for critical
+                    } else if (isHigh) {
+                      cellColor = '#EF4444'; // Red for high
+                    }
+                    
                     return (
                       <div
                         key={`${likelihood}-${severity}`}
                         style={{
-                          backgroundColor: count > 0 ? cellColor : "#1A2738",
+                          backgroundColor: cellData ? cellColor : "#1A2738",
                           borderRadius: "6px",
-                          padding: "16px 8px",
+                          padding: "8px 6px",
                           textAlign: "center",
-                          minHeight: "50px",
+                          minHeight: "44px",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          border: count > 0 ? "none" : "1px solid #2A3A4D",
+                          flexWrap: "wrap",
+                          gap: "4px",
+                          border: cellData ? "none" : "1px solid #2A3A4D",
                         }}
                       >
-                        {count > 0 && (
-                          <span style={{ color: "white", fontSize: "16px", fontWeight: "700" }}>{count}</span>
+                        {cellData && cellData.categories && (
+                          Object.entries(cellData.categories).map(([cat, catCount]) => {
+                            const catConfig = riskCategoryConfig[cat as RiskCategory];
+                            const isHovered = hoveredCell?.likelihood === likelihood && 
+                                             hoveredCell?.severity === severity && 
+                                             hoveredCell?.category === cat;
+                            
+                            // Get risks matching this cell
+                            const matchingRisks = riskProfile.risks.filter(
+                              r => r.category === cat && r.likelihood === likelihood && r.severity === severity
+                            );
+                            
+                            return (
+                              <div
+                                key={cat}
+                                style={{ position: "relative" }}
+                                onMouseEnter={() => setHoveredCell({ likelihood, severity, category: cat as RiskCategory })}
+                                onMouseLeave={(e) => {
+                                  // Check if we're moving to the tooltip
+                                  const relatedTarget = e.relatedTarget as HTMLElement;
+                                  if (relatedTarget?.closest?.('[data-tooltip="true"]')) {
+                                    return;
+                                  }
+                                  setHoveredCell(null);
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    padding: "2px 4px",
+                                    color: "white",
+                                    fontSize: "12px",
+                                    fontWeight: "700",
+                                    whiteSpace: "nowrap",
+                                    cursor: "pointer",
+                                    textDecoration: isHovered ? "underline" : "none",
+                                  }}
+                                >
+                                  {catConfig.abbr}({catCount})
+                                </span>
+                                
+                                {/* Tooltip */}
+                                {isHovered && (
+                                  <div
+                                    data-tooltip="true"
+                                    onMouseEnter={() => setHoveredCell({ likelihood, severity, category: cat as RiskCategory })}
+                                    onMouseLeave={() => setHoveredCell(null)}
+                                    style={{
+                                      position: "absolute",
+                                      top: "calc(100% - 4px)",
+                                      left: "50%",
+                                      transform: "translateX(-50%)",
+                                      zIndex: 100,
+                                      backgroundColor: "#1A2738",
+                                      border: "1px solid #3498DB",
+                                      borderRadius: "8px",
+                                      padding: "12px",
+                                      minWidth: "260px",
+                                      boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+                                      paddingTop: "16px",
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {/* Arrow pointer */}
+                                    <div style={{
+                                      position: "absolute",
+                                      top: "-6px",
+                                      left: "50%",
+                                      transform: "translateX(-50%)",
+                                      width: "12px",
+                                      height: "12px",
+                                      backgroundColor: "#1A2738",
+                                      border: "1px solid #3498DB",
+                                      borderRight: "none",
+                                      borderBottom: "none",
+                                      transform: "translateX(-50%) rotate(45deg)",
+                                    }} />
+                                    
+                                    <div style={{ 
+                                      display: "flex", 
+                                      alignItems: "center", 
+                                      gap: "8px", 
+                                      marginBottom: "10px",
+                                      paddingBottom: "8px",
+                                      borderBottom: "1px solid #2A3A4D"
+                                    }}>
+                                      <span style={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        width: "24px",
+                                        height: "24px",
+                                        borderRadius: "4px",
+                                        backgroundColor: `${catConfig.color}20`,
+                                        color: catConfig.color,
+                                        fontSize: "10px",
+                                        fontWeight: "700",
+                                      }}>
+                                        {catConfig.abbr}
+                                      </span>
+                                      <span style={{ color: "white", fontSize: "13px", fontWeight: "600" }}>
+                                        {catConfig.label} Risks ({catCount})
+                                      </span>
+                                    </div>
+                                    
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                      {matchingRisks.length > 0 ? (
+                                        matchingRisks.map((risk) => (
+                                          <div
+                                            key={risk.id}
+                                            onClick={() => {
+                                              setSelectedRisk(risk);
+                                              setHoveredCell(null);
+                                            }}
+                                            style={{
+                                              padding: "10px 12px",
+                                              backgroundColor: "#0A1628",
+                                              borderRadius: "6px",
+                                              cursor: "pointer",
+                                              border: "1px solid #2A3A4D",
+                                              transition: "all 0.2s ease",
+                                            }}
+                                            onMouseOver={(e) => {
+                                              e.currentTarget.style.borderColor = catConfig.color;
+                                              e.currentTarget.style.backgroundColor = "#162032";
+                                            }}
+                                            onMouseOut={(e) => {
+                                              e.currentTarget.style.borderColor = "#2A3A4D";
+                                              e.currentTarget.style.backgroundColor = "#0A1628";
+                                            }}
+                                          >
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                                              <span style={{ color: "#3498DB", fontSize: "11px", fontWeight: "600" }}>{risk.id}</span>
+                                              <span style={{ 
+                                                padding: "2px 6px", 
+                                                borderRadius: "4px", 
+                                                backgroundColor: `${getScoreColor(risk.score)}20`,
+                                                color: getScoreColor(risk.score),
+                                                fontSize: "10px",
+                                                fontWeight: "600"
+                                              }}>
+                                                {risk.score}
+                                              </span>
+                                            </div>
+                                            <p style={{ color: "#B8C5D3", fontSize: "11px", margin: 0, lineHeight: "1.4" }}>
+                                              {risk.description}
+                                            </p>
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <p style={{ color: "#6B7A8C", fontSize: "11px", margin: 0, fontStyle: "italic" }}>
+                                          {catCount} risk(s) in this category
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
                         )}
                       </div>
                     );
@@ -799,43 +1033,43 @@ export default function RegulatoryPage() {
         </div>
 
         {/* Second Row: KRIs + Alerts */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
           {/* Key Risk Indicators */}
-          <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px" }}>Key Risk Indicators (KRIs)</h4>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+          <div style={{ backgroundColor: "#162032", padding: "14px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" }}>Key Risk Indicators (KRIs)</h4>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px" }}>
               {riskProfile.kris.map((kri) => {
                 const TrendIcon = kri.trend === 'up' ? TrendingUp : kri.trend === 'down' ? TrendingDown : Minus;
                 const trendColor = kri.trend === 'up' ? '#E74C3C' : kri.trend === 'down' ? '#2ECC71' : '#6B7A8C';
                 return (
-                  <div key={kri.id} style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
+                  <div key={kri.id} style={{ backgroundColor: "#0A1628", padding: "10px", borderRadius: "6px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "4px" }}>
                       <div style={{
-                        width: "24px",
-                        height: "24px",
-                        borderRadius: "6px",
+                        width: "20px",
+                        height: "20px",
+                        borderRadius: "4px",
                         backgroundColor: kri.status === 'critical' ? "rgba(231, 76, 60, 0.15)" : kri.status === 'warning' ? "rgba(241, 196, 15, 0.15)" : "rgba(46, 204, 113, 0.15)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                       }}>
                         {kri.status === 'critical' ? (
-                          <AlertCircle size={14} style={{ color: "#E74C3C" }} />
+                          <AlertCircle size={12} style={{ color: "#E74C3C" }} />
                         ) : kri.status === 'warning' ? (
-                          <AlertTriangle size={14} style={{ color: "#F1C40F" }} />
+                          <AlertTriangle size={12} style={{ color: "#F1C40F" }} />
                         ) : (
-                          <CheckCircle size={14} style={{ color: "#2ECC71" }} />
+                          <CheckCircle size={12} style={{ color: "#2ECC71" }} />
                         )}
                       </div>
-                      <span style={{ color: "white", fontSize: "18px", fontWeight: "700" }}>{kri.value}{kri.unit}</span>
+                      <span style={{ color: "white", fontSize: "15px", fontWeight: "700" }}>{kri.value}{kri.unit}</span>
                       {kri.trendPercent > 0 && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
-                          <TrendIcon size={12} style={{ color: trendColor }} />
-                          <span style={{ color: trendColor, fontSize: "11px" }}>{kri.trendPercent}%</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "1px" }}>
+                          <TrendIcon size={10} style={{ color: trendColor }} />
+                          <span style={{ color: trendColor, fontSize: "10px" }}>{kri.trendPercent}%</span>
                         </div>
                       )}
                     </div>
-                    <div style={{ color: "#6B7A8C", fontSize: "11px" }}>{kri.name}</div>
+                    <div style={{ color: "#6B7A8C", fontSize: "10px" }}>{kri.name}</div>
                   </div>
                 );
               })}
@@ -843,13 +1077,13 @@ export default function RegulatoryPage() {
           </div>
 
           {/* Recent Alerts */}
-          <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px" }}>Recent Risk Trends & Alerts</h4>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ backgroundColor: "#162032", padding: "14px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" }}>Recent Risk Trends & Alerts</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {riskProfile.recentAlerts.map((alert) => (
-                <div key={alert.id} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                  <CheckCircle size={16} style={{ color: "#2ECC71", marginTop: "2px", flexShrink: 0 }} />
-                  <p style={{ color: "#B8C5D3", fontSize: "13px", lineHeight: "1.5", margin: 0 }}>
+                <div key={alert.id} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
+                  <CheckCircle size={14} style={{ color: "#2ECC71", marginTop: "2px", flexShrink: 0 }} />
+                  <p style={{ color: "#B8C5D3", fontSize: "12px", lineHeight: "1.4", margin: 0 }}>
                     {alert.message}
                   </p>
                 </div>
@@ -859,107 +1093,75 @@ export default function RegulatoryPage() {
         </div>
 
         {/* Third Row: Risk Table + Insights */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1.5fr 1fr", gap: "20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1.6fr 1fr", gap: "12px" }}>
           {/* Top Risks Table */}
-          <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", margin: 0 }}>Top Risk Categories</h4>
-              <div style={{ display: "flex", gap: "16px" }}>
-                <span style={{ color: "#6B7A8C", fontSize: "11px" }}>Total Risks</span>
-                <span style={{ color: "#6B7A8C", fontSize: "11px" }}>Overdue Actions</span>
-              </div>
+          <div style={{ backgroundColor: "#162032", padding: "14px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", margin: 0 }}>Risk Register</h4>
+              <span style={{ color: "#00D4AA", fontSize: "10px", cursor: "pointer" }}>VIEW ALL</span>
             </div>
 
             {/* Table Header */}
-            <div style={{ display: "grid", gridTemplateColumns: "70px 100px 1fr 80px 90px", gap: "8px", padding: "10px 0", borderBottom: "1px solid #2A3A4D", marginBottom: "8px" }}>
-              <span style={{ color: "#6B7A8C", fontSize: "11px", fontWeight: "600" }}>Risk ID</span>
-              <span style={{ color: "#6B7A8C", fontSize: "11px", fontWeight: "600" }}>Category</span>
-              <span style={{ color: "#6B7A8C", fontSize: "11px", fontWeight: "600" }}>Description</span>
-              <span style={{ color: "#6B7A8C", fontSize: "11px", fontWeight: "600" }}>Score</span>
-              <span style={{ color: "#6B7A8C", fontSize: "11px", fontWeight: "600" }}>Status</span>
+            <div style={{ display: "grid", gridTemplateColumns: "60px 90px 1fr 70px 80px", gap: "6px", padding: "8px 0", borderBottom: "1px solid #2A3A4D", marginBottom: "4px" }}>
+              <span style={{ color: "#6B7A8C", fontSize: "10px", fontWeight: "600" }}>Risk ID</span>
+              <span style={{ color: "#6B7A8C", fontSize: "10px", fontWeight: "600" }}>Category</span>
+              <span style={{ color: "#6B7A8C", fontSize: "10px", fontWeight: "600" }}>Description</span>
+              <span style={{ color: "#6B7A8C", fontSize: "10px", fontWeight: "600" }}>Score</span>
+              <span style={{ color: "#6B7A8C", fontSize: "10px", fontWeight: "600" }}>Status</span>
             </div>
 
             {/* Table Rows */}
-            {riskProfile.risks.slice(0, 4).map((risk, index) => {
+            {riskProfile.risks.slice(0, 5).map((risk, index) => {
               const categoryConfig = riskCategoryConfig[risk.category];
               const statusConfig = riskStatusConfig[risk.status];
               const scoreColor = getScoreColor(risk.score);
-              const scoreLabel = getScoreLabel(risk.score);
               return (
-                <div key={index} style={{ display: "grid", gridTemplateColumns: "70px 100px 1fr 80px 90px", gap: "8px", padding: "12px 0", borderBottom: "1px solid #2A3A4D", alignItems: "center" }}>
-                  <span style={{ color: "#B8C5D3", fontSize: "12px", fontWeight: "500" }}>{risk.id}</span>
+                <div key={index} style={{ display: "grid", gridTemplateColumns: "60px 90px 1fr 70px 80px", gap: "6px", padding: "8px 0", borderBottom: "1px solid #2A3A4D", alignItems: "center" }}>
+                  <span style={{ color: "#B8C5D3", fontSize: "11px", fontWeight: "500" }}>{risk.id}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: categoryConfig.color }} />
-                    <span style={{ color: "#B8C5D3", fontSize: "12px" }}>{categoryConfig.label}</span>
+                    <span style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minWidth: "20px",
+                      height: "20px",
+                      padding: "0 4px",
+                      borderRadius: "4px",
+                      backgroundColor: `${categoryConfig.color}20`,
+                      color: categoryConfig.color,
+                      fontSize: "9px",
+                      fontWeight: "700",
+                      flexShrink: 0,
+                    }}>
+                      {categoryConfig.abbr}
+                    </span>
+                    <span style={{ color: "#B8C5D3", fontSize: "10px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{categoryConfig.label}</span>
                   </div>
-                  <span style={{ color: "#8B9CAD", fontSize: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{risk.description}</span>
-                  <span style={{ padding: "4px 10px", borderRadius: "4px", backgroundColor: `${scoreColor}20`, color: scoreColor, fontSize: "11px", fontWeight: "600", textAlign: "center" }}>
-                    {risk.score} {scoreLabel}
+                  <span style={{ color: "#8B9CAD", fontSize: "11px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{risk.description}</span>
+                  <span style={{ padding: "3px 6px", borderRadius: "4px", backgroundColor: `${scoreColor}20`, color: scoreColor, fontSize: "10px", fontWeight: "600", textAlign: "center" }}>
+                    {risk.score}
                   </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <span style={{ color: statusConfig.color, fontSize: "12px" }}>{statusConfig.label}</span>
-                    <ChevronRight size={14} style={{ color: "#6B7A8C" }} />
+                  <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+                    <span style={{ color: statusConfig.color, fontSize: "10px" }}>{statusConfig.label}</span>
+                    <ChevronRight size={12} style={{ color: "#6B7A8C" }} />
                   </div>
                 </div>
               );
             })}
-
-            <button style={{
-              marginTop: "16px",
-              padding: "10px 20px",
-              backgroundColor: "#0A1628",
-              border: "1px solid #2A3A4D",
-              borderRadius: "8px",
-              color: "#B8C5D3",
-              fontSize: "12px",
-              cursor: "pointer",
-              width: "100%",
-            }}>
-              VIEW FULL REGISTER
-            </button>
           </div>
 
-          {/* ERM Insights */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-              <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px" }}>ERM Insights & Recommendations</h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {riskProfile.ermInsights.map((insight) => (
-                  <div key={insight.id} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                    <CheckCircle size={16} style={{ color: "#2ECC71", marginTop: "2px", flexShrink: 0 }} />
-                    <p style={{ color: "#B8C5D3", fontSize: "13px", lineHeight: "1.5", margin: 0 }}>
-                      {insight.recommendation}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Summary Card */}
-            <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", margin: 0 }}>Top Risk Categories</h4>
-                <span style={{ color: "#00D4AA", fontSize: "11px", cursor: "pointer" }}>VIEW ALL RISKS</span>
-              </div>
-              {(Object.entries(riskProfile.risksByCategory) as [RiskCategory, { count: number; high: number; critical: number }][])
-                .filter(([_, data]) => data.count > 0)
-                .sort((a, b) => b[1].count - a[1].count)
-                .slice(0, 3)
-                .map(([category, data]) => {
-                  const config = riskCategoryConfig[category];
-                  return (
-                    <div key={category} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #2A3A4D" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: config.color }} />
-                        <span style={{ color: "#B8C5D3", fontSize: "13px" }}>{config.label}</span>
-                      </div>
-                      <div style={{ display: "flex", gap: "24px" }}>
-                        <span style={{ color: "white", fontSize: "14px", fontWeight: "600" }}>{data.count}</span>
-                        <span style={{ color: "#E74C3C", fontSize: "14px", fontWeight: "600" }}>{data.high + data.critical}</span>
-                      </div>
-                    </div>
-                  );
-                })}
+          {/* ERM Insights - Single Card */}
+          <div style={{ backgroundColor: "#162032", padding: "14px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+            <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" }}>ERM Insights & Recommendations</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {riskProfile.ermInsights.map((insight) => (
+                <div key={insight.id} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
+                  <CheckCircle size={14} style={{ color: "#2ECC71", marginTop: "2px", flexShrink: 0 }} />
+                  <p style={{ color: "#B8C5D3", fontSize: "12px", lineHeight: "1.4", margin: 0 }}>
+                    {insight.recommendation}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -1213,39 +1415,322 @@ export default function RegulatoryPage() {
               padding: isMobile ? "0 8px" : "0 24px",
               overflowX: isMobile ? "auto" : "visible",
             }}>
-              {(["overview", "risks", "agents", "processes", "frameworks"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  style={{
-                    padding: isMobile ? "10px 12px" : "14px 20px",
-                    border: "none",
-                    borderBottom: activeTab === tab ? "2px solid #3498DB" : "2px solid transparent",
-                    backgroundColor: "transparent",
-                    color: activeTab === tab ? "white" : "#6B7A8C",
-                    fontSize: isMobile ? "12px" : "14px",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                    textTransform: "capitalize",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {tab}
-                </button>
-              ))}
+              {(["risks", "agents", "processes", "frameworks", "summary"] as const).map((tab) => {
+                const tabLabels: Record<string, string> = {
+                  risks: "Risks",
+                  agents: "Agents + Models",
+                  processes: "Processes",
+                  frameworks: "Frameworks",
+                  summary: "Summary",
+                };
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    style={{
+                      padding: isMobile ? "10px 12px" : "14px 20px",
+                      border: "none",
+                      borderBottom: activeTab === tab ? "2px solid #3498DB" : "2px solid transparent",
+                      backgroundColor: "transparent",
+                      color: activeTab === tab ? "white" : "#6B7A8C",
+                      fontSize: isMobile ? "12px" : "14px",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {tabLabels[tab]}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Tab Content */}
             <div style={{ padding: isMobile ? "16px" : "24px", maxHeight: isMobile ? "none" : "calc(100vh - 380px)", overflowY: "auto" }}>
-              {activeTab === "overview" && renderOverview()}
               {activeTab === "risks" && renderRiskOverview()}
               {activeTab === "agents" && renderAgents()}
               {activeTab === "processes" && renderProcesses()}
               {activeTab === "frameworks" && renderFrameworks()}
+              {activeTab === "summary" && renderOverview()}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Risk Detail Modal */}
+      {selectedRisk && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 200,
+          }}
+          onClick={() => setSelectedRisk(null)}
+        >
+          <div
+            style={{
+              backgroundColor: "#1A2738",
+              borderRadius: "16px",
+              border: "1px solid #2A3A4D",
+              padding: "24px",
+              maxWidth: "650px",
+              width: "90%",
+              maxHeight: "85vh",
+              overflowY: "auto",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "8px",
+                  backgroundColor: `${riskCategoryConfig[selectedRisk.category].color}20`,
+                  color: riskCategoryConfig[selectedRisk.category].color,
+                  fontSize: "14px",
+                  fontWeight: "700",
+                }}>
+                  {riskCategoryConfig[selectedRisk.category].abbr}
+                </span>
+                <div>
+                  <h3 style={{ color: "white", fontSize: "18px", fontWeight: "700", margin: 0 }}>{selectedRisk.id}</h3>
+                  <span style={{ color: riskCategoryConfig[selectedRisk.category].color, fontSize: "13px" }}>
+                    {riskCategoryConfig[selectedRisk.category].label}
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                {/* Copilot Button */}
+                <button
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "8px 14px",
+                    borderRadius: "8px",
+                    backgroundColor: "rgba(155, 89, 182, 0.15)",
+                    border: "1px solid #9B59B6",
+                    color: "#9B59B6",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                  }}
+                >
+                  <Bot size={16} />
+                  AI Copilot
+                </button>
+                <button
+                  onClick={() => setSelectedRisk(null)}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "8px",
+                    backgroundColor: "#0A1628",
+                    border: "1px solid #2A3A4D",
+                    color: "#6B7A8C",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Risk Description */}
+            <p style={{ color: "#B8C5D3", fontSize: "14px", lineHeight: "1.6", marginBottom: "16px" }}>
+              {selectedRisk.description}
+            </p>
+
+            {/* Risk Metrics */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", marginBottom: "16px" }}>
+              <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
+                <span style={{ color: "#6B7A8C", fontSize: "10px", display: "block", marginBottom: "4px" }}>Risk Score</span>
+                <span style={{ color: getScoreColor(selectedRisk.score), fontSize: "20px", fontWeight: "700" }}>
+                  {selectedRisk.score}
+                </span>
+              </div>
+              <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
+                <span style={{ color: "#6B7A8C", fontSize: "10px", display: "block", marginBottom: "4px" }}>Status</span>
+                <span style={{ color: riskStatusConfig[selectedRisk.status].color, fontSize: "14px", fontWeight: "600", textTransform: "capitalize" }}>
+                  {riskStatusConfig[selectedRisk.status].label}
+                </span>
+              </div>
+              <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
+                <span style={{ color: "#6B7A8C", fontSize: "10px", display: "block", marginBottom: "4px" }}>Severity</span>
+                <span style={{ color: severityConfig[selectedRisk.severity].color, fontSize: "14px", fontWeight: "600", textTransform: "capitalize" }}>
+                  {severityConfig[selectedRisk.severity].label}
+                </span>
+              </div>
+              <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
+                <span style={{ color: "#6B7A8C", fontSize: "10px", display: "block", marginBottom: "4px" }}>Likelihood</span>
+                <span style={{ color: "white", fontSize: "14px", fontWeight: "600", textTransform: "capitalize" }}>
+                  {likelihoodConfig[selectedRisk.likelihood].label}
+                </span>
+              </div>
+            </div>
+
+            {/* Owner & Last Updated */}
+            <div style={{ display: "flex", gap: "20px", marginBottom: "16px", padding: "12px", backgroundColor: "#0A1628", borderRadius: "8px" }}>
+              <div style={{ flex: 1 }}>
+                <span style={{ color: "#6B7A8C", fontSize: "10px", display: "block", marginBottom: "2px" }}>Risk Owner</span>
+                <span style={{ color: "white", fontSize: "13px", fontWeight: "500" }}>{selectedRisk.owner}</span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <span style={{ color: "#6B7A8C", fontSize: "10px", display: "block", marginBottom: "2px" }}>Last Updated</span>
+                <span style={{ color: "white", fontSize: "13px", fontWeight: "500" }}>{selectedRisk.lastUpdated}</span>
+              </div>
+            </div>
+
+            {/* Input Sources */}
+            {selectedRisk.inputSources && (
+              <div style={{ marginBottom: "16px" }}>
+                <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <FileText size={14} style={{ color: "#3498DB" }} />
+                  Input Sources
+                </h4>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {selectedRisk.inputSources.map((source, i) => (
+                    <span key={i} style={{ padding: "4px 10px", backgroundColor: "#0A1628", borderRadius: "6px", color: "#B8C5D3", fontSize: "11px", border: "1px solid #2A3A4D" }}>
+                      {source}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ML Model */}
+            {selectedRisk.mlModel && (
+              <div style={{ marginBottom: "16px", backgroundColor: "#0A1628", borderRadius: "10px", padding: "14px", border: "1px solid #2A3A4D" }}>
+                <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <BarChart3 size={14} style={{ color: "#F1C40F" }} />
+                  ML Model Used
+                </h4>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+                  <div>
+                    <span style={{ color: "#6B7A8C", fontSize: "10px", display: "block", marginBottom: "2px" }}>Model Name</span>
+                    <span style={{ color: "#F1C40F", fontSize: "13px", fontWeight: "600" }}>{selectedRisk.mlModel.name}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: "#6B7A8C", fontSize: "10px", display: "block", marginBottom: "2px" }}>Type</span>
+                    <span style={{ color: "white", fontSize: "13px", fontWeight: "500" }}>{selectedRisk.mlModel.type}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: "#6B7A8C", fontSize: "10px", display: "block", marginBottom: "2px" }}>Accuracy</span>
+                    <span style={{ color: "#2ECC71", fontSize: "13px", fontWeight: "600" }}>{selectedRisk.mlModel.accuracy}%</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* AI Agent */}
+            {selectedRisk.aiAgent && (
+              <div style={{ marginBottom: "16px", backgroundColor: "rgba(155, 89, 182, 0.1)", borderRadius: "10px", padding: "14px", border: "1px solid rgba(155, 89, 182, 0.3)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
+                  <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Bot size={14} style={{ color: "#9B59B6" }} />
+                    AI Agent for Mitigation
+                  </h4>
+                  <span style={{ padding: "3px 8px", backgroundColor: "rgba(46, 204, 113, 0.15)", borderRadius: "4px", color: "#2ECC71", fontSize: "10px", fontWeight: "600" }}>
+                    {selectedRisk.aiAgent.automationLevel}% Automated
+                  </span>
+                </div>
+                <div style={{ marginBottom: "10px" }}>
+                  <span style={{ color: "#9B59B6", fontSize: "15px", fontWeight: "600" }}>{selectedRisk.aiAgent.name}</span>
+                  <span style={{ color: "#6B7A8C", fontSize: "12px", marginLeft: "8px" }}>({selectedRisk.aiAgent.type})</span>
+                </div>
+                <div>
+                  <span style={{ color: "#6B7A8C", fontSize: "10px", display: "block", marginBottom: "6px" }}>Capabilities</span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                    {selectedRisk.aiAgent.capabilities.map((cap, i) => (
+                      <span key={i} style={{ padding: "4px 10px", backgroundColor: "rgba(155, 89, 182, 0.2)", borderRadius: "6px", color: "#D7BDE2", fontSize: "11px" }}>
+                        {cap}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Mitigation Actions */}
+            <div style={{ marginBottom: "16px" }}>
+              <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <Shield size={14} style={{ color: "#2ECC71" }} />
+                Mitigation Actions
+              </h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                {selectedRisk.mitigationActions.map((action, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", backgroundColor: "#0A1628", borderRadius: "6px" }}>
+                    <CheckCircle size={14} style={{ color: "#2ECC71", flexShrink: 0 }} />
+                    <span style={{ color: "#B8C5D3", fontSize: "12px" }}>{action}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: "flex", gap: "10px", paddingTop: "12px", borderTop: "1px solid #2A3A4D" }}>
+              <Link
+                href="/modules/regulatory/risk"
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  backgroundColor: "#3498DB",
+                  border: "none",
+                  color: "white",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  textDecoration: "none",
+                }}
+              >
+                <Eye size={16} />
+                View Full Risk Page
+              </Link>
+              <button
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  backgroundColor: "rgba(155, 89, 182, 0.15)",
+                  border: "1px solid #9B59B6",
+                  color: "#9B59B6",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                }}
+              >
+                <Bot size={16} />
+                Deploy AI Agent
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
