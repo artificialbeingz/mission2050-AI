@@ -19,6 +19,8 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     if (isAuth === "true") {
       setIsAuthenticated(true);
     } else {
+      // Store the intended destination before redirecting to auth
+      localStorage.setItem("mission2050_redirect", pathname);
       router.push("/auth");
     }
   }, [pathname, router]);

@@ -16,7 +16,10 @@ export default function AuthPage() {
     // Check if already authenticated
     const isAuth = localStorage.getItem("mission2050_auth");
     if (isAuth === "true") {
-      router.push("/");
+      // Redirect to stored URL or home
+      const redirectUrl = localStorage.getItem("mission2050_redirect") || "/";
+      localStorage.removeItem("mission2050_redirect");
+      router.push(redirectUrl);
     }
   }, [router]);
 
@@ -31,9 +34,14 @@ export default function AuthPage() {
     if (password === "mission2050") {
       setAuthenticated(true);
       localStorage.setItem("mission2050_auth", "true");
+      
+      // Get the intended redirect URL or default to home
+      const redirectUrl = localStorage.getItem("mission2050_redirect") || "/";
+      localStorage.removeItem("mission2050_redirect"); // Clean up
+      
       // Delay for animation
       await new Promise((resolve) => setTimeout(resolve, 500));
-      router.push("/");
+      router.push(redirectUrl);
     } else {
       setError(true);
       setLoading(false);
