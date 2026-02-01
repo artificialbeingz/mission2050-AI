@@ -25,6 +25,15 @@ import {
   LucideIcon,
   Menu,
   X,
+  ShieldCheck,
+  Scale,
+  Settings,
+  Target,
+  Lock,
+  CheckCircle,
+  TrendingDown,
+  Minus,
+  AlertCircle,
 } from "lucide-react";
 import { useIsMobile, useIsTablet } from "@/hooks/useMediaQuery";
 
@@ -43,12 +52,25 @@ import {
   AgentType,
 } from "@/data/regulatoryCompliance";
 
+import {
+  getRiskProfile,
+  riskCategoryConfig,
+  riskStatusConfig,
+  getScoreColor,
+  getScoreLabel,
+  getHeatMapCellColor,
+  severityConfig,
+  likelihoodConfig,
+  RiskCategory,
+  CompanyRiskProfile,
+} from "@/data/riskManagement";
+
 export default function RegulatoryPage() {
   const isMobile = useIsMobile();
   const isTablet = useIsTablet();
-  
+
   const [selectedCompany, setSelectedCompany] = useState<ComplianceCompany | null>(complianceCompanies[0]);
-  const [activeTab, setActiveTab] = useState<"overview" | "agents" | "processes" | "frameworks">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "risks" | "agents" | "processes" | "frameworks">("overview");
   const [selectedAgent, setSelectedAgent] = useState<ComplianceAgent | null>(null);
   const [selectedProcess, setSelectedProcess] = useState<DownstreamProcess | null>(null);
   const [expandedProcess, setExpandedProcess] = useState<string | null>(null);
@@ -527,7 +549,7 @@ export default function RegulatoryPage() {
                     <div style={{ position: "relative", paddingLeft: "24px" }}>
                       {/* Vertical Line */}
                       <div style={{ position: "absolute", left: "7px", top: "10px", bottom: "10px", width: "2px", backgroundColor: "#2A3A4D" }} />
-                      
+
                       {proc.steps.map((step, i) => (
                         <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "16px", marginBottom: i === proc.steps.length - 1 ? 0 : "16px", position: "relative" }}>
                           {/* Step Indicator */}
@@ -547,7 +569,7 @@ export default function RegulatoryPage() {
                           >
                             <span style={{ color: "white", fontSize: "10px", fontWeight: "700" }}>{step.order}</span>
                           </div>
-                          
+
                           <div style={{ flex: 1, backgroundColor: "#0A1628", padding: "12px 14px", borderRadius: "8px" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px" }}>
                               <span style={{ color: "white", fontSize: "13px", fontWeight: "500" }}>{step.name}</span>
@@ -615,6 +637,335 @@ export default function RegulatoryPage() {
       </div>
     </div>
   );
+
+  const getRiskCategoryIcon = (category: RiskCategory): LucideIcon => {
+    const icons: Record<RiskCategory, LucideIcon> = {
+      compliance: ShieldCheck,
+      legal: Scale,
+      operational: Settings,
+      strategic: Target,
+      reputational: Users,
+      cybersecurity: Lock,
+      financial: DollarSign,
+      people_workforce: Users,
+    };
+    return icons[category] || Shield;
+  };
+
+  const renderRiskOverview = () => {
+    if (!selectedCompany) return null;
+
+    const riskProfile = getRiskProfile(selectedCompany.id);
+    if (!riskProfile) {
+      return (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "300px", color: "#6B7A8C" }}>
+          <AlertTriangle size={40} style={{ marginBottom: "12px", opacity: 0.5 }} />
+          <p>No risk data available for this company</p>
+        </div>
+      );
+    }
+
+    const severities: Array<keyof typeof severityConfig> = ['insignificant', 'minor', 'moderate', 'major', 'severe'];
+    const likelihoods: Array<keyof typeof likelihoodConfig> = ['likely', 'medium', 'high', 'extreme'];
+
+    // Build heat map grid
+    const getHeatMapCount = (likelihood: string, severity: string): number => {
+      const cell = riskProfile.heatMapData.find(
+        c => c.likelihood === likelihood && c.severity === severity
+      );
+      return cell?.count || 0;
+    };
+
+    return (
+      <div>
+        {/* Top Row: Summary Cards + Heat Map */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "280px 1fr", gap: "20px", marginBottom: "20px" }}>
+          {/* Left Column: Summary Cards + Risk Categories */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {/* Total Risks Card */}
+            <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+              <div style={{ color: "#6B7A8C", fontSize: "12px", marginBottom: "8px" }}>Total Risks</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ width: "40px", height: "40px", borderRadius: "10px", backgroundColor: "rgba(52, 152, 219, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Shield size={20} style={{ color: "#3498DB" }} />
+                </div>
+                <div>
+                  <span style={{ color: "white", fontSize: "28px", fontWeight: "700" }}>{riskProfile.activeRisks}</span>
+                  <span style={{ color: "#6B7A8C", fontSize: "14px", marginLeft: "6px" }}>Active</span>
+                </div>
+              </div>
+            </div>
+
+            {/* High & Critical Risks Card */}
+            <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+              <div style={{ color: "#6B7A8C", fontSize: "12px", marginBottom: "8px" }}>High & Critical Risks</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ width: "40px", height: "40px", borderRadius: "10px", backgroundColor: "rgba(231, 76, 60, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <AlertTriangle size={20} style={{ color: "#E74C3C" }} />
+                </div>
+                <div>
+                  <span style={{ color: "#E74C3C", fontSize: "28px", fontWeight: "700" }}>{riskProfile.highCriticalRisks}</span>
+                </div>
+              </div>
+              <div style={{ marginTop: "8px", color: "#E74C3C", fontSize: "12px" }}>
+                • {riskProfile.criticalRisks} Critical Risks
+              </div>
+            </div>
+
+            {/* Top Risk Categories */}
+            <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "12px", border: "1px solid #2A3A4D", flex: 1 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                <span style={{ color: "white", fontSize: "14px", fontWeight: "600" }}>Top Risk Categories</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {(Object.entries(riskProfile.risksByCategory) as [RiskCategory, { count: number; high: number; critical: number }][])
+                  .filter(([_, data]) => data.count > 0)
+                  .sort((a, b) => b[1].count - a[1].count)
+                  .map(([category, data]) => {
+                    const config = riskCategoryConfig[category];
+                    const Icon = getRiskCategoryIcon(category);
+                    return (
+                      <div key={category} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #2A3A4D" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <Icon size={16} style={{ color: config.color }} />
+                          <span style={{ color: "#B8C5D3", fontSize: "13px" }}>{config.label}</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span style={{ color: "white", fontSize: "14px", fontWeight: "600" }}>{data.count}</span>
+                          {data.critical > 0 && (
+                            <span style={{ padding: "2px 6px", borderRadius: "4px", backgroundColor: "rgba(231, 76, 60, 0.15)", color: "#E74C3C", fontSize: "10px", fontWeight: "600" }}>
+                              {data.critical}
+                            </span>
+                          )}
+                          {data.high > 0 && (
+                            <span style={{ padding: "2px 6px", borderRadius: "4px", backgroundColor: "rgba(230, 126, 34, 0.15)", color: "#E67E22", fontSize: "10px", fontWeight: "600" }}>
+                              {data.high}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Heat Map */}
+          <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "20px" }}>Risk Heat Map</h4>
+            <div style={{ display: "grid", gridTemplateColumns: "80px repeat(5, 1fr)", gap: "4px" }}>
+              {/* Header row */}
+              <div></div>
+              {severities.map((severity) => (
+                <div key={severity} style={{ textAlign: "center", color: "#6B7A8C", fontSize: "10px", padding: "8px 4px" }}>
+                  {severityConfig[severity].label}
+                </div>
+              ))}
+
+              {/* Data rows */}
+              {likelihoods.slice().reverse().map((likelihood) => (
+                <>
+                  <div key={`label-${likelihood}`} style={{ display: "flex", alignItems: "center", color: "#6B7A8C", fontSize: "11px", paddingRight: "8px" }}>
+                    {likelihoodConfig[likelihood].label}
+                  </div>
+                  {severities.map((severity) => {
+                    const count = getHeatMapCount(likelihood, severity);
+                    const cellColor = getHeatMapCellColor(likelihood, severity);
+                    return (
+                      <div
+                        key={`${likelihood}-${severity}`}
+                        style={{
+                          backgroundColor: count > 0 ? cellColor : "#1A2738",
+                          borderRadius: "6px",
+                          padding: "16px 8px",
+                          textAlign: "center",
+                          minHeight: "50px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          border: count > 0 ? "none" : "1px solid #2A3A4D",
+                        }}
+                      >
+                        {count > 0 && (
+                          <span style={{ color: "white", fontSize: "16px", fontWeight: "700" }}>{count}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Second Row: KRIs + Alerts */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+          {/* Key Risk Indicators */}
+          <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px" }}>Key Risk Indicators (KRIs)</h4>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              {riskProfile.kris.map((kri) => {
+                const TrendIcon = kri.trend === 'up' ? TrendingUp : kri.trend === 'down' ? TrendingDown : Minus;
+                const trendColor = kri.trend === 'up' ? '#E74C3C' : kri.trend === 'down' ? '#2ECC71' : '#6B7A8C';
+                return (
+                  <div key={kri.id} style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
+                      <div style={{
+                        width: "24px",
+                        height: "24px",
+                        borderRadius: "6px",
+                        backgroundColor: kri.status === 'critical' ? "rgba(231, 76, 60, 0.15)" : kri.status === 'warning' ? "rgba(241, 196, 15, 0.15)" : "rgba(46, 204, 113, 0.15)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}>
+                        {kri.status === 'critical' ? (
+                          <AlertCircle size={14} style={{ color: "#E74C3C" }} />
+                        ) : kri.status === 'warning' ? (
+                          <AlertTriangle size={14} style={{ color: "#F1C40F" }} />
+                        ) : (
+                          <CheckCircle size={14} style={{ color: "#2ECC71" }} />
+                        )}
+                      </div>
+                      <span style={{ color: "white", fontSize: "18px", fontWeight: "700" }}>{kri.value}{kri.unit}</span>
+                      {kri.trendPercent > 0 && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+                          <TrendIcon size={12} style={{ color: trendColor }} />
+                          <span style={{ color: trendColor, fontSize: "11px" }}>{kri.trendPercent}%</span>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ color: "#6B7A8C", fontSize: "11px" }}>{kri.name}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Recent Alerts */}
+          <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px" }}>Recent Risk Trends & Alerts</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {riskProfile.recentAlerts.map((alert) => (
+                <div key={alert.id} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                  <CheckCircle size={16} style={{ color: "#2ECC71", marginTop: "2px", flexShrink: 0 }} />
+                  <p style={{ color: "#B8C5D3", fontSize: "13px", lineHeight: "1.5", margin: 0 }}>
+                    {alert.message}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Third Row: Risk Table + Insights */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1.5fr 1fr", gap: "20px" }}>
+          {/* Top Risks Table */}
+          <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", margin: 0 }}>Top Risk Categories</h4>
+              <div style={{ display: "flex", gap: "16px" }}>
+                <span style={{ color: "#6B7A8C", fontSize: "11px" }}>Total Risks</span>
+                <span style={{ color: "#6B7A8C", fontSize: "11px" }}>Overdue Actions</span>
+              </div>
+            </div>
+
+            {/* Table Header */}
+            <div style={{ display: "grid", gridTemplateColumns: "70px 100px 1fr 80px 90px", gap: "8px", padding: "10px 0", borderBottom: "1px solid #2A3A4D", marginBottom: "8px" }}>
+              <span style={{ color: "#6B7A8C", fontSize: "11px", fontWeight: "600" }}>Risk ID</span>
+              <span style={{ color: "#6B7A8C", fontSize: "11px", fontWeight: "600" }}>Category</span>
+              <span style={{ color: "#6B7A8C", fontSize: "11px", fontWeight: "600" }}>Description</span>
+              <span style={{ color: "#6B7A8C", fontSize: "11px", fontWeight: "600" }}>Score</span>
+              <span style={{ color: "#6B7A8C", fontSize: "11px", fontWeight: "600" }}>Status</span>
+            </div>
+
+            {/* Table Rows */}
+            {riskProfile.risks.slice(0, 4).map((risk, index) => {
+              const categoryConfig = riskCategoryConfig[risk.category];
+              const statusConfig = riskStatusConfig[risk.status];
+              const scoreColor = getScoreColor(risk.score);
+              const scoreLabel = getScoreLabel(risk.score);
+              return (
+                <div key={index} style={{ display: "grid", gridTemplateColumns: "70px 100px 1fr 80px 90px", gap: "8px", padding: "12px 0", borderBottom: "1px solid #2A3A4D", alignItems: "center" }}>
+                  <span style={{ color: "#B8C5D3", fontSize: "12px", fontWeight: "500" }}>{risk.id}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: categoryConfig.color }} />
+                    <span style={{ color: "#B8C5D3", fontSize: "12px" }}>{categoryConfig.label}</span>
+                  </div>
+                  <span style={{ color: "#8B9CAD", fontSize: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{risk.description}</span>
+                  <span style={{ padding: "4px 10px", borderRadius: "4px", backgroundColor: `${scoreColor}20`, color: scoreColor, fontSize: "11px", fontWeight: "600", textAlign: "center" }}>
+                    {risk.score} {scoreLabel}
+                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <span style={{ color: statusConfig.color, fontSize: "12px" }}>{statusConfig.label}</span>
+                    <ChevronRight size={14} style={{ color: "#6B7A8C" }} />
+                  </div>
+                </div>
+              );
+            })}
+
+            <button style={{
+              marginTop: "16px",
+              padding: "10px 20px",
+              backgroundColor: "#0A1628",
+              border: "1px solid #2A3A4D",
+              borderRadius: "8px",
+              color: "#B8C5D3",
+              fontSize: "12px",
+              cursor: "pointer",
+              width: "100%",
+            }}>
+              VIEW FULL REGISTER
+            </button>
+          </div>
+
+          {/* ERM Insights */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+              <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", marginBottom: "16px" }}>ERM Insights & Recommendations</h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {riskProfile.ermInsights.map((insight) => (
+                  <div key={insight.id} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                    <CheckCircle size={16} style={{ color: "#2ECC71", marginTop: "2px", flexShrink: 0 }} />
+                    <p style={{ color: "#B8C5D3", fontSize: "13px", lineHeight: "1.5", margin: 0 }}>
+                      {insight.recommendation}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Summary Card */}
+            <div style={{ backgroundColor: "#162032", padding: "20px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                <h4 style={{ color: "white", fontSize: "15px", fontWeight: "600", margin: 0 }}>Top Risk Categories</h4>
+                <span style={{ color: "#00D4AA", fontSize: "11px", cursor: "pointer" }}>VIEW ALL RISKS</span>
+              </div>
+              {(Object.entries(riskProfile.risksByCategory) as [RiskCategory, { count: number; high: number; critical: number }][])
+                .filter(([_, data]) => data.count > 0)
+                .sort((a, b) => b[1].count - a[1].count)
+                .slice(0, 3)
+                .map(([category, data]) => {
+                  const config = riskCategoryConfig[category];
+                  return (
+                    <div key={category} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #2A3A4D" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: config.color }} />
+                        <span style={{ color: "#B8C5D3", fontSize: "13px" }}>{config.label}</span>
+                      </div>
+                      <div style={{ display: "flex", gap: "24px" }}>
+                        <span style={{ color: "white", fontSize: "14px", fontWeight: "600" }}>{data.count}</span>
+                        <span style={{ color: "#E74C3C", fontSize: "14px", fontWeight: "600" }}>{data.high + data.critical}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <main style={{ minHeight: "100vh", backgroundColor: "#0A1628" }}>
@@ -807,15 +1158,15 @@ export default function RegulatoryPage() {
                 </select>
               </div>
             )}
-            
+
             {/* Company Header */}
             {selectedCompany && (
-              <div style={{ 
-                padding: isMobile ? "12px 16px" : "20px 24px", 
-                borderBottom: "1px solid #2A3A4D", 
-                display: "flex", 
+              <div style={{
+                padding: isMobile ? "12px 16px" : "20px 24px",
+                borderBottom: "1px solid #2A3A4D",
+                display: "flex",
                 flexDirection: isMobile ? "column" : "row",
-                justifyContent: "space-between", 
+                justifyContent: "space-between",
                 alignItems: isMobile ? "flex-start" : "center",
                 gap: isMobile ? "12px" : "0",
               }}>
@@ -856,13 +1207,13 @@ export default function RegulatoryPage() {
             )}
 
             {/* Tabs */}
-            <div style={{ 
-              display: "flex", 
-              borderBottom: "1px solid #2A3A4D", 
+            <div style={{
+              display: "flex",
+              borderBottom: "1px solid #2A3A4D",
               padding: isMobile ? "0 8px" : "0 24px",
               overflowX: isMobile ? "auto" : "visible",
             }}>
-              {(["overview", "agents", "processes", "frameworks"] as const).map((tab) => (
+              {(["overview", "risks", "agents", "processes", "frameworks"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -887,6 +1238,7 @@ export default function RegulatoryPage() {
             {/* Tab Content */}
             <div style={{ padding: isMobile ? "16px" : "24px", maxHeight: isMobile ? "none" : "calc(100vh - 380px)", overflowY: "auto" }}>
               {activeTab === "overview" && renderOverview()}
+              {activeTab === "risks" && renderRiskOverview()}
               {activeTab === "agents" && renderAgents()}
               {activeTab === "processes" && renderProcesses()}
               {activeTab === "frameworks" && renderFrameworks()}
