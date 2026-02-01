@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import AuthGuard from "@/components/AuthGuard";
 
 export const metadata: Metadata = {
   title: "Mission 2050 | Infrastructure Intelligence Platform",
@@ -22,7 +23,7 @@ export default function RootLayout({
         <div className="animated-bg">
           <div className="grid-pattern" />
         </div>
-        {children}
+        <AuthGuard>{children}</AuthGuard>
       </body>
     </html>
   );
