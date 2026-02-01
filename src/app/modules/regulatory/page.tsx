@@ -930,7 +930,6 @@ export default function RegulatoryPage() {
                                       position: "absolute",
                                       top: "-6px",
                                       left: "50%",
-                                      transform: "translateX(-50%)",
                                       width: "12px",
                                       height: "12px",
                                       backgroundColor: "#1A2738",
