@@ -72,8 +72,8 @@ export const modules: Module[] = [
   },
   {
     id: "regulatory",
-    name: "Regulatory Compliance",
-    shortName: "Regulatory",
+    name: "Enterprise Risk Management",
+    shortName: "ERM",
     description: "Track and manage regulatory requirements across jurisdictions",
     icon: FileCheck,
     color: "#E74C3C",

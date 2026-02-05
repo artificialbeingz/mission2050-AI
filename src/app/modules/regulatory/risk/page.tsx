@@ -103,20 +103,20 @@ export default function RiskWorkflowPage() {
   };
 
   const downstreamProcesses: DownstreamProcess[] = [
-    { 
-      id: "proc-1", 
-      name: "Legal Defense Preparation", 
-      type: "manual", 
+    {
+      id: "proc-1",
+      name: "Legal Defense Preparation",
+      type: "manual",
       status: "in_progress",
       assignee: "Legal Team",
       description: "Prepare comprehensive legal defense strategy",
       icon: Scale,
       color: "#E74C3C",
     },
-    { 
-      id: "proc-2", 
-      name: "Document Collection & Review", 
-      type: "ai_assisted", 
+    {
+      id: "proc-2",
+      name: "Document Collection & Review",
+      type: "ai_assisted",
       status: "completed",
       agent: "DocReview AI",
       description: "AI-powered document scanning and relevance scoring",
@@ -125,17 +125,17 @@ export default function RiskWorkflowPage() {
       approvalRequired: true,
       aiAction: "Scan and classify 45,230 loan documents for relevance to the lawsuit. Flag high-priority documents for legal review.",
     },
-    { 
-      id: "proc-3", 
-      name: "Stakeholder Notification", 
-      type: "automated", 
+    {
+      id: "proc-3",
+      name: "Stakeholder Notification",
+      type: "automated",
       status: "completed",
       agent: "NotifyBot",
       description: "Automated emails to board members and key stakeholders",
       icon: Mail,
       color: "#2ECC71",
       emailTemplate: {
-        to: "board@royalbank.com, executives@royalbank.com",
+        to: "board@reco.on.ca, executives@reco.on.ca",
         subject: "URGENT: Legal Risk Alert - Class Action Lawsuit Update (R-004)",
         body: `Dear Board Members and Executive Team,
 
@@ -161,13 +161,13 @@ Please review the attached briefing document and confirm your availability for t
 
 Best regards,
 Risk Management AI System
-Royal Bank of Canada`
+Real Estate Council of Ontario`
       },
     },
-    { 
-      id: "proc-4", 
-      name: "Settlement Analysis", 
-      type: "ai_assisted", 
+    {
+      id: "proc-4",
+      name: "Settlement Analysis",
+      type: "ai_assisted",
       status: "in_progress",
       agent: "SettlementCalc AI",
       description: "AI-driven settlement range calculation and scenario modeling",
@@ -176,10 +176,10 @@ Royal Bank of Canada`
       approvalRequired: true,
       aiAction: "Run Monte Carlo simulation with 10,000 iterations to calculate optimal settlement range. Analyze comparable cases and generate recommendation report.",
     },
-    { 
-      id: "proc-5", 
-      name: "Customer Communication", 
-      type: "automated", 
+    {
+      id: "proc-5",
+      name: "Customer Communication",
+      type: "automated",
       status: "pending",
       agent: "CommsBot",
       description: "Automated response templates and communication tracking",
@@ -187,11 +187,11 @@ Royal Bank of Canada`
       color: "#9B59B6",
       approvalRequired: true,
       emailTemplate: {
-        to: "affected-customers@distribution-list.royalbank.com",
+        to: "affected-customers@distribution-list.reco.on.ca",
         subject: "Important Information About Your Mortgage Account",
         body: `Dear Valued Customer,
 
-We are writing to inform you about a legal matter that may affect your mortgage account with Royal Bank of Canada.
+We are writing to inform you about a legal matter that may affect your mortgage account with Real Estate Council of Ontario.
 
 WHAT THIS MEANS FOR YOU:
 We are committed to treating all our customers fairly and transparently. While this legal matter is being resolved, please be assured that:
@@ -201,29 +201,29 @@ We are committed to treating all our customers fairly and transparently. While t
 • Our customer service team is available to answer any questions
 
 NEXT STEPS:
-If you have any concerns or questions, please contact our dedicated support line at 1-800-XXX-XXXX or email mortgage-support@royalbank.com.
+If you have any concerns or questions, please contact our dedicated support line at 1-800-XXX-XXXX or email mortgage-support@reco.on.ca.
 
 We value your trust and will keep you informed of any developments that may affect your account.
 
 Sincerely,
 Customer Relations Team
-Royal Bank of Canada`
+Real Estate Council of Ontario`
       },
     },
-    { 
-      id: "proc-6", 
-      name: "Board Briefing Preparation", 
-      type: "manual", 
+    {
+      id: "proc-6",
+      name: "Board Briefing Preparation",
+      type: "manual",
       status: "pending",
       assignee: "Executive Assistant",
       description: "Prepare executive summary and board presentation",
       icon: Users,
       color: "#E67E22",
     },
-    { 
-      id: "proc-7", 
-      name: "Compliance Audit Trigger", 
-      type: "automated", 
+    {
+      id: "proc-7",
+      name: "Compliance Audit Trigger",
+      type: "automated",
       status: "completed",
       agent: "AuditTrigger",
       description: "Automatically initiated internal compliance review",
@@ -232,10 +232,10 @@ Royal Bank of Canada`
       approvalRequired: true,
       aiAction: "Initiate comprehensive internal audit of mortgage lending practices. Generate audit checklist and assign review tasks to compliance team.",
     },
-    { 
-      id: "proc-8", 
-      name: "Vendor/Supplier Alert", 
-      type: "automated", 
+    {
+      id: "proc-8",
+      name: "Vendor/Supplier Alert",
+      type: "automated",
       status: "pending",
       agent: "VendorComms AI",
       description: "Notify relevant third-party vendors and suppliers",
@@ -244,7 +244,7 @@ Royal Bank of Canada`
       approvalRequired: true,
       emailTemplate: {
         to: "legal-partners@lawfirm.com, insurance@provider.com",
-        subject: "Notice: Potential Legal Exposure - Royal Bank Mortgage Litigation",
+        subject: "Notice: Potential Legal Exposure - Real Estate Council of Ontario Mortgage Litigation",
         body: `Dear Partner,
 
 This notice is to inform you of a developing legal matter that may require your attention and support.
@@ -265,7 +265,7 @@ Please treat this communication as confidential. A formal engagement request wil
 
 Best regards,
 Legal Operations
-Royal Bank of Canada`
+Real Estate Council of Ontario`
       },
     },
   ];
@@ -309,8 +309,8 @@ Royal Bank of Canada`
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#0A1628" }}>
       {/* Header */}
-      <header style={{ 
-        backgroundColor: "#0D1B2A", 
+      <header style={{
+        backgroundColor: "#0D1B2A",
         borderBottom: "1px solid #1E3A5F",
         padding: "16px 24px",
         position: "sticky",
@@ -319,13 +319,13 @@ Royal Bank of Canada`
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <Link 
+            <Link
               href="/modules/regulatory"
-              style={{ 
-                display: "flex", 
-                alignItems: "center", 
-                gap: "8px", 
-                color: "#6B7A8C", 
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                color: "#6B7A8C",
                 textDecoration: "none",
                 padding: "8px 12px",
                 borderRadius: "8px",
@@ -338,9 +338,9 @@ Royal Bank of Canada`
             </Link>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <span style={{ 
-                  padding: "4px 10px", 
-                  backgroundColor: "rgba(231, 76, 60, 0.15)", 
+                <span style={{
+                  padding: "4px 10px",
+                  backgroundColor: "rgba(231, 76, 60, 0.15)",
                   borderRadius: "6px",
                   color: "#E74C3C",
                   fontSize: "12px",
@@ -351,9 +351,9 @@ Royal Bank of Canada`
                 <h1 style={{ color: "white", fontSize: "18px", fontWeight: "600", margin: 0 }}>
                   Risk Workflow Dashboard
                 </h1>
-                <span style={{ 
-                  padding: "4px 10px", 
-                  backgroundColor: "rgba(241, 196, 15, 0.15)", 
+                <span style={{
+                  padding: "4px 10px",
+                  backgroundColor: "rgba(241, 196, 15, 0.15)",
                   borderRadius: "6px",
                   color: "#F1C40F",
                   fontSize: "11px",
@@ -411,33 +411,33 @@ Royal Bank of Canada`
       {/* Main Content */}
       <main style={{ padding: "24px" }}>
         {/* Risk Summary Bar */}
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(5, 1fr)", 
-          gap: "16px", 
-          marginBottom: "24px" 
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(5, 1fr)",
+          gap: "16px",
+          marginBottom: "24px"
         }}>
           {/* Risk Score - Special handling */}
-          <div style={{ 
-            backgroundColor: "#162032", 
-            borderRadius: "10px", 
+          <div style={{
+            backgroundColor: "#162032",
+            borderRadius: "10px",
             padding: "14px 16px",
             border: allApproved ? "1px solid #2ECC71" : "1px solid #2A3A4D",
             transition: "all 0.3s ease",
           }}>
             <span style={{ color: "#6B7A8C", fontSize: "11px", display: "block", marginBottom: "4px" }}>Risk Score</span>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ 
-                color: allApproved ? "#F1C40F" : "#E74C3C", 
-                fontSize: "20px", 
+              <span style={{
+                color: allApproved ? "#F1C40F" : "#E74C3C",
+                fontSize: "20px",
                 fontWeight: "700",
                 transition: "all 0.3s ease",
               }}>
                 {riskData.score}
               </span>
               {allApproved && (
-                <span style={{ 
-                  color: "#2ECC71", 
+                <span style={{
+                  color: "#2ECC71",
                   fontSize: "11px",
                   display: "flex",
                   alignItems: "center",
@@ -454,9 +454,9 @@ Royal Bank of Canada`
             { label: "Likelihood", value: riskData.likelihood, color: allApproved ? "#F1C40F" : "#E67E22" },
             { label: "Owner", value: riskData.owner, color: "#3498DB" },
           ].map((item, idx) => (
-            <div key={idx} style={{ 
-              backgroundColor: "#162032", 
-              borderRadius: "10px", 
+            <div key={idx} style={{
+              backgroundColor: "#162032",
+              borderRadius: "10px",
               padding: "14px 16px",
               border: "1px solid #2A3A4D",
             }}>
@@ -468,12 +468,12 @@ Royal Bank of Canada`
 
         {/* Workflow Visualization */}
         <div style={{ display: "flex", gap: "20px", alignItems: "stretch" }}>
-          
+
           {/* Input Sources */}
-          <div style={{ 
+          <div style={{
             flex: "0 0 220px",
-            backgroundColor: "#162032", 
-            borderRadius: "12px", 
+            backgroundColor: "#162032",
+            borderRadius: "12px",
             border: "1px solid #2A3A4D",
             padding: "16px",
           }}>
@@ -485,11 +485,11 @@ Royal Bank of Canada`
               {inputSources.map((source) => {
                 const Icon = source.icon;
                 return (
-                  <div 
+                  <div
                     key={source.id}
-                    style={{ 
-                      backgroundColor: "#0A1628", 
-                      borderRadius: "8px", 
+                    style={{
+                      backgroundColor: "#0A1628",
+                      borderRadius: "8px",
                       padding: "12px",
                       border: "1px solid #2A3A4D",
                       cursor: "pointer",
@@ -499,10 +499,10 @@ Royal Bank of Canada`
                     onMouseLeave={(e) => e.currentTarget.style.borderColor = "#2A3A4D"}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
-                      <div style={{ 
-                        width: "28px", 
-                        height: "28px", 
-                        borderRadius: "6px", 
+                      <div style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "6px",
                         backgroundColor: `${source.color}20`,
                         display: "flex",
                         alignItems: "center",
@@ -524,9 +524,9 @@ Royal Bank of Canada`
 
           {/* Arrow */}
           <div style={{ display: "flex", alignItems: "center", color: "#3498DB" }}>
-            <div style={{ 
-              width: "40px", 
-              height: "2px", 
+            <div style={{
+              width: "40px",
+              height: "2px",
               backgroundColor: "#3498DB",
               position: "relative",
             }}>
@@ -535,10 +535,10 @@ Royal Bank of Canada`
           </div>
 
           {/* ML Model */}
-          <div style={{ 
+          <div style={{
             flex: "0 0 280px",
-            backgroundColor: "#162032", 
-            borderRadius: "12px", 
+            backgroundColor: "#162032",
+            borderRadius: "12px",
             border: "1px solid #F1C40F",
             padding: "16px",
           }}>
@@ -546,9 +546,9 @@ Royal Bank of Canada`
               <BarChart3 size={16} style={{ color: "#F1C40F" }} />
               ML Risk Prediction
             </h3>
-            <div style={{ 
-              backgroundColor: "#0A1628", 
-              borderRadius: "8px", 
+            <div style={{
+              backgroundColor: "#0A1628",
+              borderRadius: "8px",
               padding: "14px",
               marginBottom: "12px",
               border: "1px solid #2A3A4D",
@@ -558,9 +558,9 @@ Royal Bank of Canada`
                   <h4 style={{ color: "#F1C40F", fontSize: "14px", fontWeight: "600", margin: 0 }}>{mlModel.name}</h4>
                   <span style={{ color: "#6B7A8C", fontSize: "11px" }}>{mlModel.type}</span>
                 </div>
-                <span style={{ 
-                  padding: "3px 8px", 
-                  backgroundColor: "rgba(46, 204, 113, 0.15)", 
+                <span style={{
+                  padding: "3px 8px",
+                  backgroundColor: "rgba(46, 204, 113, 0.15)",
                   borderRadius: "4px",
                   color: "#2ECC71",
                   fontSize: "11px",
@@ -584,15 +584,15 @@ Royal Bank of Canada`
                     <span style={{ color: "#B8C5D3", fontSize: "11px" }}>{pred.label}</span>
                     <span style={{ color: pred.color, fontSize: "11px", fontWeight: "600" }}>{pred.value}%</span>
                   </div>
-                  <div style={{ 
-                    height: "4px", 
-                    backgroundColor: "#0A1628", 
+                  <div style={{
+                    height: "4px",
+                    backgroundColor: "#0A1628",
                     borderRadius: "2px",
                     overflow: "hidden",
                   }}>
-                    <div style={{ 
-                      width: `${pred.value}%`, 
-                      height: "100%", 
+                    <div style={{
+                      width: `${pred.value}%`,
+                      height: "100%",
                       backgroundColor: pred.color,
                       borderRadius: "2px",
                     }} />
@@ -604,9 +604,9 @@ Royal Bank of Canada`
 
           {/* Arrow */}
           <div style={{ display: "flex", alignItems: "center", color: "#9B59B6" }}>
-            <div style={{ 
-              width: "40px", 
-              height: "2px", 
+            <div style={{
+              width: "40px",
+              height: "2px",
               backgroundColor: "#9B59B6",
               position: "relative",
             }}>
@@ -615,10 +615,10 @@ Royal Bank of Canada`
           </div>
 
           {/* Downstream Processes */}
-          <div style={{ 
+          <div style={{
             flex: 1,
-            backgroundColor: "#162032", 
-            borderRadius: "12px", 
+            backgroundColor: "#162032",
+            borderRadius: "12px",
             border: "1px solid #2A3A4D",
             padding: "16px",
           }}>
@@ -630,11 +630,11 @@ Royal Bank of Canada`
               {downstreamProcesses.map((proc) => {
                 const Icon = proc.icon;
                 return (
-                  <div 
+                  <div
                     key={proc.id}
-                    style={{ 
-                      backgroundColor: "#0A1628", 
-                      borderRadius: "8px", 
+                    style={{
+                      backgroundColor: "#0A1628",
+                      borderRadius: "8px",
                       padding: "12px",
                       border: `1px solid ${activeNode === proc.id ? proc.color : "#2A3A4D"}`,
                       cursor: "pointer",
@@ -643,10 +643,10 @@ Royal Bank of Canada`
                     onClick={() => setSelectedProcess(proc)}
                   >
                     <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                      <div style={{ 
-                        width: "32px", 
-                        height: "32px", 
-                        borderRadius: "8px", 
+                      <div style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "8px",
                         backgroundColor: `${proc.color}20`,
                         display: "flex",
                         alignItems: "center",
@@ -662,8 +662,8 @@ Royal Bank of Canada`
                           </h5>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                          <span style={{ 
-                            padding: "2px 6px", 
+                          <span style={{
+                            padding: "2px 6px",
                             backgroundColor: `${getTypeColor(proc.type)}15`,
                             borderRadius: "3px",
                             color: getTypeColor(proc.type),
@@ -673,7 +673,7 @@ Royal Bank of Canada`
                             {proc.type === "automated" && <Bot size={8} style={{ marginRight: "3px", display: "inline" }} />}
                             {getTypeLabel(proc.type)}
                           </span>
-                          <span style={{ 
+                          <span style={{
                             display: "flex",
                             alignItems: "center",
                             gap: "4px",
@@ -712,25 +712,25 @@ Royal Bank of Canada`
         </div>
 
         {/* Action Categories */}
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(3, 1fr)", 
-          gap: "20px", 
-          marginTop: "24px" 
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "20px",
+          marginTop: "24px"
         }}>
           {/* 1. Confirmed AI Automated Steps */}
-          <div style={{ 
-            backgroundColor: "#162032", 
-            borderRadius: "12px", 
+          <div style={{
+            backgroundColor: "#162032",
+            borderRadius: "12px",
             padding: "20px",
             border: "1px solid #2ECC71",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ 
-                  width: "40px", 
-                  height: "40px", 
-                  borderRadius: "10px", 
+                <div style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "10px",
                   backgroundColor: "rgba(46, 204, 113, 0.15)",
                   display: "flex",
                   alignItems: "center",
@@ -743,9 +743,9 @@ Royal Bank of Canada`
                   <span style={{ color: "#2ECC71", fontSize: "12px" }}>Automated & Complete</span>
                 </div>
               </div>
-              <span style={{ 
-                padding: "6px 12px", 
-                backgroundColor: "rgba(46, 204, 113, 0.15)", 
+              <span style={{
+                padding: "6px 12px",
+                backgroundColor: "rgba(46, 204, 113, 0.15)",
                 borderRadius: "20px",
                 color: "#2ECC71",
                 fontSize: "14px",
@@ -762,12 +762,12 @@ Royal Bank of Canada`
               ].map((item, idx) => {
                 const proc = downstreamProcesses.find(p => p.id === item.id);
                 return (
-                  <div 
-                    key={idx} 
+                  <div
+                    key={idx}
                     onClick={() => proc && setSelectedProcess(proc)}
-                    style={{ 
-                      display: "flex", 
-                      alignItems: "center", 
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
                       gap: "10px",
                       padding: "10px 12px",
                       backgroundColor: "#0A1628",
@@ -792,18 +792,18 @@ Royal Bank of Canada`
           </div>
 
           {/* 2. Approval Required */}
-          <div style={{ 
-            backgroundColor: "#162032", 
-            borderRadius: "12px", 
+          <div style={{
+            backgroundColor: "#162032",
+            borderRadius: "12px",
             padding: "20px",
             border: `1px solid ${allApproved ? "#2ECC71" : "#F1C40F"}`,
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ 
-                  width: "40px", 
-                  height: "40px", 
-                  borderRadius: "10px", 
+                <div style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "10px",
                   backgroundColor: allApproved ? "rgba(46, 204, 113, 0.15)" : "rgba(241, 196, 15, 0.15)",
                   display: "flex",
                   alignItems: "center",
@@ -822,9 +822,9 @@ Royal Bank of Canada`
                   </span>
                 </div>
               </div>
-              <span style={{ 
-                padding: "6px 12px", 
-                backgroundColor: allApproved ? "rgba(46, 204, 113, 0.15)" : "rgba(241, 196, 15, 0.15)", 
+              <span style={{
+                padding: "6px 12px",
+                backgroundColor: allApproved ? "rgba(46, 204, 113, 0.15)" : "rgba(241, 196, 15, 0.15)",
                 borderRadius: "20px",
                 color: allApproved ? "#2ECC71" : "#F1C40F",
                 fontSize: "14px",
@@ -841,12 +841,12 @@ Royal Bank of Canada`
               ].map((item, idx) => {
                 const proc = downstreamProcesses.find(p => p.id === item.id);
                 return (
-                  <div 
-                    key={idx} 
+                  <div
+                    key={idx}
                     onClick={() => proc && setSelectedProcess(proc)}
-                    style={{ 
-                      display: "flex", 
-                      alignItems: "center", 
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
                       gap: "10px",
                       padding: "10px 12px",
                       backgroundColor: "#0A1628",
@@ -895,9 +895,9 @@ Royal Bank of Canada`
                 Approve All AI Actions
               </button>
             ) : (
-              <div style={{ 
-                display: "flex", 
-                alignItems: "center", 
+              <div style={{
+                display: "flex",
+                alignItems: "center",
                 justifyContent: "center",
                 gap: "8px",
                 padding: "12px",
@@ -912,18 +912,18 @@ Royal Bank of Canada`
           </div>
 
           {/* 3. Manual Steps Required */}
-          <div style={{ 
-            backgroundColor: "#162032", 
-            borderRadius: "12px", 
+          <div style={{
+            backgroundColor: "#162032",
+            borderRadius: "12px",
             padding: "20px",
             border: "1px solid #6B7A8C",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ 
-                  width: "40px", 
-                  height: "40px", 
-                  borderRadius: "10px", 
+                <div style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "10px",
                   backgroundColor: "rgba(107, 122, 140, 0.15)",
                   display: "flex",
                   alignItems: "center",
@@ -936,9 +936,9 @@ Royal Bank of Canada`
                   <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Human Action Needed</span>
                 </div>
               </div>
-              <span style={{ 
-                padding: "6px 12px", 
-                backgroundColor: "rgba(107, 122, 140, 0.15)", 
+              <span style={{
+                padding: "6px 12px",
+                backgroundColor: "rgba(107, 122, 140, 0.15)",
                 borderRadius: "20px",
                 color: "#B8C5D3",
                 fontSize: "14px",
@@ -954,12 +954,12 @@ Royal Bank of Canada`
               ].map((item, idx) => {
                 const proc = downstreamProcesses.find(p => p.id === item.id);
                 return (
-                  <div 
-                    key={idx} 
+                  <div
+                    key={idx}
                     onClick={() => proc && setSelectedProcess(proc)}
-                    style={{ 
-                      display: "flex", 
-                      alignItems: "center", 
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
                       gap: "10px",
                       padding: "10px 12px",
                       backgroundColor: allApproved && idx === 0 ? "rgba(52, 152, 219, 0.1)" : "#0A1628",
@@ -984,9 +984,9 @@ Royal Bank of Canada`
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         <span style={{ color: "#B8C5D3", fontSize: "12px" }}>{item.name}</span>
                         {allApproved && idx === 0 && (
-                          <span style={{ 
-                            padding: "2px 6px", 
-                            backgroundColor: "#3498DB", 
+                          <span style={{
+                            padding: "2px 6px",
+                            backgroundColor: "#3498DB",
                             borderRadius: "3px",
                             color: "white",
                             fontSize: "9px",
@@ -998,8 +998,8 @@ Royal Bank of Canada`
                       </div>
                       <span style={{ color: "#6B7A8C", fontSize: "10px" }}>Assigned: {item.assignee}</span>
                     </div>
-                    <span style={{ 
-                      padding: "3px 8px", 
+                    <span style={{
+                      padding: "3px 8px",
                       backgroundColor: item.priority === "high" ? "rgba(231, 76, 60, 0.15)" : "rgba(241, 196, 15, 0.15)",
                       borderRadius: "4px",
                       color: item.priority === "high" ? "#E74C3C" : "#F1C40F",
@@ -1015,7 +1015,7 @@ Royal Bank of Canada`
               })}
             </div>
             {allApproved && (
-              <div style={{ 
+              <div style={{
                 marginTop: "14px",
                 padding: "12px",
                 backgroundColor: "rgba(52, 152, 219, 0.1)",
@@ -1068,10 +1068,10 @@ Royal Bank of Canada`
             {/* Modal Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                <div style={{ 
-                  width: "48px", 
-                  height: "48px", 
-                  borderRadius: "12px", 
+                <div style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "12px",
                   backgroundColor: `${selectedProcess.color}20`,
                   display: "flex",
                   alignItems: "center",
@@ -1082,8 +1082,8 @@ Royal Bank of Canada`
                 <div>
                   <h3 style={{ color: "white", fontSize: "18px", fontWeight: "700", margin: 0 }}>{selectedProcess.name}</h3>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
-                    <span style={{ 
-                      padding: "3px 8px", 
+                    <span style={{
+                      padding: "3px 8px",
                       backgroundColor: `${getTypeColor(selectedProcess.type)}15`,
                       borderRadius: "4px",
                       color: getTypeColor(selectedProcess.type),
@@ -1093,8 +1093,8 @@ Royal Bank of Canada`
                       {selectedProcess.type === "automated" || selectedProcess.type === "ai_assisted" ? <Bot size={10} style={{ marginRight: "4px", display: "inline" }} /> : null}
                       {getTypeLabel(selectedProcess.type)}
                     </span>
-                    <span style={{ 
-                      padding: "3px 8px", 
+                    <span style={{
+                      padding: "3px 8px",
                       backgroundColor: `${getStatusColor(selectedProcess.status)}15`,
                       borderRadius: "4px",
                       color: getStatusColor(selectedProcess.status),
@@ -1131,10 +1131,10 @@ Royal Bank of Canada`
             </p>
 
             {/* Agent/Assignee Info */}
-            <div style={{ 
-              backgroundColor: "#0A1628", 
-              borderRadius: "10px", 
-              padding: "14px", 
+            <div style={{
+              backgroundColor: "#0A1628",
+              borderRadius: "10px",
+              padding: "14px",
               marginBottom: "20px",
               border: "1px solid #2A3A4D",
             }}>
@@ -1164,9 +1164,9 @@ Royal Bank of Canada`
                   <Bot size={16} style={{ color: "#9B59B6" }} />
                   AI Action Requiring Approval
                 </h4>
-                <div style={{ 
-                  backgroundColor: "rgba(155, 89, 182, 0.1)", 
-                  borderRadius: "10px", 
+                <div style={{
+                  backgroundColor: "rgba(155, 89, 182, 0.1)",
+                  borderRadius: "10px",
                   padding: "16px",
                   border: "1px solid rgba(155, 89, 182, 0.3)",
                   marginBottom: "12px",
@@ -1175,7 +1175,7 @@ Royal Bank of Canada`
                     {selectedProcess.aiAction}
                   </p>
                 </div>
-                
+
                 {approved[selectedProcess.id] === undefined || approved[selectedProcess.id] === null ? (
                   <div style={{ display: "flex", gap: "10px" }}>
                     <button
@@ -1222,9 +1222,9 @@ Royal Bank of Canada`
                     </button>
                   </div>
                 ) : (
-                  <div style={{ 
-                    padding: "12px", 
-                    borderRadius: "8px", 
+                  <div style={{
+                    padding: "12px",
+                    borderRadius: "8px",
                     backgroundColor: approved[selectedProcess.id] ? "rgba(46, 204, 113, 0.15)" : "rgba(231, 76, 60, 0.15)",
                     border: `1px solid ${approved[selectedProcess.id] ? "#2ECC71" : "#E74C3C"}`,
                     display: "flex",
@@ -1273,10 +1273,10 @@ Royal Bank of Canada`
                     Edit Template
                   </button>
                 </div>
-                
-                <div style={{ 
-                  backgroundColor: "#0A1628", 
-                  borderRadius: "10px", 
+
+                <div style={{
+                  backgroundColor: "#0A1628",
+                  borderRadius: "10px",
                   border: "1px solid #2A3A4D",
                   overflow: "hidden",
                 }}>
@@ -1291,13 +1291,13 @@ Royal Bank of Canada`
                       <span style={{ color: "white", fontSize: "12px", fontWeight: "500" }}>{selectedProcess.emailTemplate.subject}</span>
                     </div>
                   </div>
-                  
+
                   {/* Email Body */}
                   <div style={{ padding: "16px", maxHeight: "200px", overflowY: "auto" }}>
-                    <pre style={{ 
-                      color: "#B8C5D3", 
-                      fontSize: "12px", 
-                      lineHeight: "1.6", 
+                    <pre style={{
+                      color: "#B8C5D3",
+                      fontSize: "12px",
+                      lineHeight: "1.6",
                       margin: 0,
                       whiteSpace: "pre-wrap",
                       fontFamily: "inherit",
@@ -1352,10 +1352,10 @@ Royal Bank of Canada`
                       </button>
                     </>
                   ) : (
-                    <div style={{ 
+                    <div style={{
                       flex: 1,
-                      padding: "12px", 
-                      borderRadius: "8px", 
+                      padding: "12px",
+                      borderRadius: "8px",
                       backgroundColor: "rgba(46, 204, 113, 0.15)",
                       border: "1px solid #2ECC71",
                       display: "flex",
@@ -1373,9 +1373,9 @@ Royal Bank of Canada`
 
             {/* Manual Process Actions */}
             {selectedProcess.type === "manual" && !selectedProcess.emailTemplate && !selectedProcess.aiAction && (
-              <div style={{ 
-                backgroundColor: "#0A1628", 
-                borderRadius: "10px", 
+              <div style={{
+                backgroundColor: "#0A1628",
+                borderRadius: "10px",
                 padding: "16px",
                 border: "1px solid #2A3A4D",
               }}>
@@ -1426,10 +1426,10 @@ Royal Bank of Canada`
           }}
         >
           <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
-            <div style={{ 
-              width: "44px", 
-              height: "44px", 
-              borderRadius: "10px", 
+            <div style={{
+              width: "44px",
+              height: "44px",
+              borderRadius: "10px",
               backgroundColor: "rgba(46, 204, 113, 0.15)",
               display: "flex",
               alignItems: "center",
@@ -1443,12 +1443,12 @@ Royal Bank of Canada`
                 AI Actions Approved Successfully!
               </h4>
               <p style={{ color: "#B8C5D3", fontSize: "13px", lineHeight: "1.5", margin: "0 0 12px 0" }}>
-                Risk score reduced from <strong style={{ color: "#E74C3C" }}>18</strong> to <strong style={{ color: "#F1C40F" }}>10</strong>. 
+                Risk score reduced from <strong style={{ color: "#E74C3C" }}>18</strong> to <strong style={{ color: "#F1C40F" }}>10</strong>.
                 AI agents are now executing mitigation tasks.
               </p>
-              <div style={{ 
-                backgroundColor: "#0A1628", 
-                borderRadius: "8px", 
+              <div style={{
+                backgroundColor: "#0A1628",
+                borderRadius: "8px",
                 padding: "12px",
                 border: "1px solid #2A3A4D",
               }}>

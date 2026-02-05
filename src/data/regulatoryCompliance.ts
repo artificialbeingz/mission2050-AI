@@ -1,6 +1,6 @@
 // Regulatory Compliance Module Data
 
-export type RegulatoryFramework = 
+export type RegulatoryFramework =
   | 'pipeda'           // Personal Information Protection and Electronic Documents Act
   | 'osfi'             // Office of the Superintendent of Financial Institutions
   | 'csa'              // Canadian Securities Administrators
@@ -16,7 +16,7 @@ export type RegulatoryFramework =
 
 export type ComplianceStatus = 'compliant' | 'at_risk' | 'non_compliant' | 'pending_review' | 'exempt';
 
-export type AgentType = 
+export type AgentType =
   | 'document_analyzer'
   | 'policy_monitor'
   | 'audit_assistant'
@@ -28,7 +28,7 @@ export type AgentType =
 
 export type ProcessStatus = 'active' | 'pending' | 'completed' | 'failed' | 'scheduled';
 
-export type ProcessType = 
+export type ProcessType =
   | 'approval_workflow'
   | 'notification'
   | 'data_extraction'
@@ -109,16 +109,16 @@ export interface ComplianceCompany {
   complianceTeamSize: number;
   annualComplianceBudget: number; // millions CAD
   description: string;
-  
+
   // Compliance metrics by framework
   complianceMetrics: ComplianceMetric[];
-  
+
   // AI Agents deployed
   agents: ComplianceAgent[];
-  
+
   // Downstream processes
   processes: DownstreamProcess[];
-  
+
   // Aggregate stats
   overallComplianceScore: number;
   automationRate: number;
@@ -207,7 +207,7 @@ export const regulatoryFrameworks: Record<RegulatoryFramework, { name: string; r
 export const complianceCompanies: ComplianceCompany[] = [
   {
     id: 'comp-reg-001',
-    name: 'Royal Bank of Canada',
+    name: 'Real Estate Council of Ontario',
     industry: 'Financial Services',
     headquarters: 'Toronto, ON',
     employees: 92000,

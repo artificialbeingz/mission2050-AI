@@ -80,6 +80,9 @@ export default function RegulatoryPage() {
   const [showMobileCompanyList, setShowMobileCompanyList] = useState(false);
   const [hoveredCell, setHoveredCell] = useState<{ likelihood: RiskLikelihood; severity: RiskSeverity; category: RiskCategory } | null>(null);
   const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
+  const [hoveredCategory, setHoveredCategory] = useState<RiskCategory | null>(null);
+  const [viewMode, setViewMode] = useState<"view1" | "view2">("view1");
+  const [hoveredKriId, setHoveredKriId] = useState<string | null>(null);
 
   // Global stats
   const globalStats = useMemo(() => {
@@ -106,6 +109,63 @@ export default function RegulatoryPage() {
     };
     return icons[type] || Bot;
   };
+
+  // View 2 dark theme colors - PURE BLACK
+  const v2Colors = {
+    bgDark: "#000000",
+    bgCard: "#080808",
+    bgCardGradient: "linear-gradient(135deg, #0A0A0A 0%, #000000 100%)",
+    border: "#333333",
+    borderAccent: "#444444",
+    text: "#C0D0E0",
+    textMuted: "#8A9AA0",
+  };
+
+  // Helper for View 2 CEER-style card styling
+  const getCardStyle = (baseStyle: React.CSSProperties): React.CSSProperties => {
+    if (viewMode === "view2") {
+      return {
+        ...baseStyle,
+        borderRadius: "0",
+        clipPath: "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)",
+        border: `1px solid ${v2Colors.border}`,
+        background: v2Colors.bgCardGradient,
+        backgroundColor: v2Colors.bgCard,
+      };
+    }
+    return baseStyle;
+  };
+
+  // Helper for View 2 futuristic text styling
+  const getTextStyle = (baseStyle: React.CSSProperties): React.CSSProperties => {
+    if (viewMode === "view2") {
+      return {
+        ...baseStyle,
+        fontFamily: "'Orbitron', sans-serif",
+        letterSpacing: "1px",
+        textTransform: "uppercase" as const,
+      };
+    }
+    return baseStyle;
+  };
+
+  // Helper for View 2 number styling (bold, futuristic)
+  const getNumberStyle = (baseStyle: React.CSSProperties): React.CSSProperties => {
+    if (viewMode === "view2") {
+      return {
+        ...baseStyle,
+        fontFamily: "'Orbitron', sans-serif",
+        letterSpacing: "2px",
+      };
+    }
+    return baseStyle;
+  };
+
+  // Helper for page background in View 2
+  const getPageBgColor = () => viewMode === "view2" ? v2Colors.bgDark : "#0A1628";
+
+  // Helper for container backgrounds in View 2
+  const getContainerBg = () => viewMode === "view2" ? v2Colors.bgCard : "#1A2738";
 
   const renderCompanyList = () => (
     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -177,8 +237,8 @@ export default function RegulatoryPage() {
           {selectedCompany.description}
         </p>
 
-        {/* Company Stats Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? "10px" : "16px", marginBottom: isMobile ? "16px" : "24px" }}>
+        {/* Company Stats Grid - Replaced with KRIs */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? "8px" : "16px", marginBottom: isMobile ? "16px" : "24px" }}>
           <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
               <Users size={18} style={{ color: "#3498DB" }} />
@@ -264,7 +324,7 @@ export default function RegulatoryPage() {
 
   const renderAgents = () => {
     if (!selectedCompany) return null;
-    
+
     // Key ML models for predictive maintenance and risk management
     const predictiveMaintenanceModels = [
       { name: "RiskPredict-XL", type: "Predictive Risk Scoring", accuracy: 96.8, description: "Predicts risk likelihood and impact using historical patterns" },
@@ -274,7 +334,7 @@ export default function RegulatoryPage() {
       { name: "SentimentNLP-v3", type: "NLP Sentiment Analysis", accuracy: 91.7, description: "Analyzes regulatory documents and communications" },
       { name: "ClusterRisk-AI", type: "Risk Clustering", accuracy: 89.4, description: "Groups similar risks for efficient mitigation strategies" },
     ];
-    
+
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
         {/* Agents Section */}
@@ -285,169 +345,169 @@ export default function RegulatoryPage() {
               <Bot size={18} style={{ color: "#9B59B6" }} />
               AI Compliance Agents ({selectedCompany.agents.length})
             </h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {selectedCompany.agents.map((agent) => {
-              const AgentIcon = getAgentIcon(agent.type);
-              const isSelected = selectedAgent?.id === agent.id;
-              return (
-                <div
-                  key={agent.id}
-                  onClick={() => setSelectedAgent(agent)}
-                  style={{
-                    backgroundColor: isSelected ? `${getAgentTypeColor(agent.type)}15` : "#162032",
-                    border: `1px solid ${isSelected ? getAgentTypeColor(agent.type) : "#2A3A4D"}`,
-                    borderRadius: "10px",
-                    padding: "16px",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                    <div
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        borderRadius: "10px",
-                        backgroundColor: `${getAgentTypeColor(agent.type)}20`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <AgentIcon size={20} style={{ color: getAgentTypeColor(agent.type) }} />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "4px" }}>
-                        <h5 style={{ color: "white", fontSize: "14px", fontWeight: "600", margin: 0 }}>{agent.name}</h5>
-                        <span
-                          style={{
-                            padding: "2px 8px",
-                            borderRadius: "4px",
-                            fontSize: "10px",
-                            fontWeight: "500",
-                            backgroundColor: agent.status === "active" ? "rgba(46, 204, 113, 0.15)" : "rgba(241, 196, 15, 0.15)",
-                            color: agent.status === "active" ? "#2ECC71" : "#F1C40F",
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          {agent.status}
-                        </span>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {selectedCompany.agents.map((agent) => {
+                const AgentIcon = getAgentIcon(agent.type);
+                const isSelected = selectedAgent?.id === agent.id;
+                return (
+                  <div
+                    key={agent.id}
+                    onClick={() => setSelectedAgent(agent)}
+                    style={{
+                      backgroundColor: isSelected ? `${getAgentTypeColor(agent.type)}15` : "#162032",
+                      border: `1px solid ${isSelected ? getAgentTypeColor(agent.type) : "#2A3A4D"}`,
+                      borderRadius: "10px",
+                      padding: "16px",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+                      <div
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "10px",
+                          backgroundColor: `${getAgentTypeColor(agent.type)}20`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <AgentIcon size={20} style={{ color: getAgentTypeColor(agent.type) }} />
                       </div>
-                      <span style={{ color: getAgentTypeColor(agent.type), fontSize: "11px", fontWeight: "500" }}>{getAgentTypeLabel(agent.type)}</span>
-                      <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
-                        <span style={{ color: "#6B7A8C", fontSize: "11px" }}>
-                          <span style={{ color: "#2ECC71" }}>{agent.accuracyRate}%</span> accuracy
-                        </span>
-                        <span style={{ color: "#6B7A8C", fontSize: "11px" }}>
-                          <span style={{ color: "#3498DB" }}>{agent.automationLevel}%</span> automated
-                        </span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "4px" }}>
+                          <h5 style={{ color: "white", fontSize: "14px", fontWeight: "600", margin: 0 }}>{agent.name}</h5>
+                          <span
+                            style={{
+                              padding: "2px 8px",
+                              borderRadius: "4px",
+                              fontSize: "10px",
+                              fontWeight: "500",
+                              backgroundColor: agent.status === "active" ? "rgba(46, 204, 113, 0.15)" : "rgba(241, 196, 15, 0.15)",
+                              color: agent.status === "active" ? "#2ECC71" : "#F1C40F",
+                              textTransform: "capitalize",
+                            }}
+                          >
+                            {agent.status}
+                          </span>
+                        </div>
+                        <span style={{ color: getAgentTypeColor(agent.type), fontSize: "11px", fontWeight: "500" }}>{getAgentTypeLabel(agent.type)}</span>
+                        <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+                          <span style={{ color: "#6B7A8C", fontSize: "11px" }}>
+                            <span style={{ color: "#2ECC71" }}>{agent.accuracyRate}%</span> accuracy
+                          </span>
+                          <span style={{ color: "#6B7A8C", fontSize: "11px" }}>
+                            <span style={{ color: "#3498DB" }}>{agent.automationLevel}%</span> automated
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        {/* Agent Detail */}
-        <div style={{ backgroundColor: "#162032", borderRadius: "12px", border: "1px solid #2A3A4D", padding: "20px" }}>
-          {selectedAgent ? (
-            <div>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "14px", marginBottom: "20px" }}>
-                <div
-                  style={{
-                    width: "50px",
-                    height: "50px",
-                    borderRadius: "12px",
-                    backgroundColor: `${getAgentTypeColor(selectedAgent.type)}20`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {(() => {
-                    const AgentIcon = getAgentIcon(selectedAgent.type);
-                    return <AgentIcon size={24} style={{ color: getAgentTypeColor(selectedAgent.type) }} />;
-                  })()}
+          {/* Agent Detail */}
+          <div style={{ backgroundColor: "#162032", borderRadius: "12px", border: "1px solid #2A3A4D", padding: "20px" }}>
+            {selectedAgent ? (
+              <div>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "14px", marginBottom: "20px" }}>
+                  <div
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      borderRadius: "12px",
+                      backgroundColor: `${getAgentTypeColor(selectedAgent.type)}20`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {(() => {
+                      const AgentIcon = getAgentIcon(selectedAgent.type);
+                      return <AgentIcon size={24} style={{ color: getAgentTypeColor(selectedAgent.type) }} />;
+                    })()}
+                  </div>
+                  <div>
+                    <h4 style={{ color: "white", fontSize: "18px", fontWeight: "600", marginBottom: "4px" }}>{selectedAgent.name}</h4>
+                    <span style={{ color: getAgentTypeColor(selectedAgent.type), fontSize: "13px", fontWeight: "500" }}>{getAgentTypeLabel(selectedAgent.type)}</span>
+                  </div>
                 </div>
-                <div>
-                  <h4 style={{ color: "white", fontSize: "18px", fontWeight: "600", marginBottom: "4px" }}>{selectedAgent.name}</h4>
-                  <span style={{ color: getAgentTypeColor(selectedAgent.type), fontSize: "13px", fontWeight: "500" }}>{getAgentTypeLabel(selectedAgent.type)}</span>
-                </div>
-              </div>
 
-              <p style={{ color: "#8B9CAD", fontSize: "13px", lineHeight: "1.6", marginBottom: "20px" }}>{selectedAgent.description}</p>
+                <p style={{ color: "#8B9CAD", fontSize: "13px", lineHeight: "1.6", marginBottom: "20px" }}>{selectedAgent.description}</p>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", marginBottom: "20px" }}>
-                <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
-                  <span style={{ color: "#6B7A8C", fontSize: "11px", display: "block", marginBottom: "4px" }}>Model</span>
-                  <span style={{ color: "#00D4AA", fontSize: "13px", fontWeight: "500" }}>{selectedAgent.model}</span>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", marginBottom: "20px" }}>
+                  <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
+                    <span style={{ color: "#6B7A8C", fontSize: "11px", display: "block", marginBottom: "4px" }}>Model</span>
+                    <span style={{ color: "#00D4AA", fontSize: "13px", fontWeight: "500" }}>{selectedAgent.model}</span>
+                  </div>
+                  <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
+                    <span style={{ color: "#6B7A8C", fontSize: "11px", display: "block", marginBottom: "4px" }}>Framework</span>
+                    <span style={{ color: "#F1C40F", fontSize: "13px", fontWeight: "500" }}>{selectedAgent.framework}</span>
+                  </div>
+                  <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
+                    <span style={{ color: "#6B7A8C", fontSize: "11px", display: "block", marginBottom: "4px" }}>Monthly Processed</span>
+                    <span style={{ color: "white", fontSize: "16px", fontWeight: "600" }}>{selectedAgent.monthlyProcessed.toLocaleString()}</span>
+                  </div>
+                  <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
+                    <span style={{ color: "#6B7A8C", fontSize: "11px", display: "block", marginBottom: "4px" }}>Avg Response</span>
+                    <span style={{ color: "white", fontSize: "16px", fontWeight: "600" }}>{selectedAgent.avgResponseTime}</span>
+                  </div>
                 </div>
-                <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
-                  <span style={{ color: "#6B7A8C", fontSize: "11px", display: "block", marginBottom: "4px" }}>Framework</span>
-                  <span style={{ color: "#F1C40F", fontSize: "13px", fontWeight: "500" }}>{selectedAgent.framework}</span>
-                </div>
-                <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
-                  <span style={{ color: "#6B7A8C", fontSize: "11px", display: "block", marginBottom: "4px" }}>Monthly Processed</span>
-                  <span style={{ color: "white", fontSize: "16px", fontWeight: "600" }}>{selectedAgent.monthlyProcessed.toLocaleString()}</span>
-                </div>
-                <div style={{ backgroundColor: "#0A1628", padding: "12px", borderRadius: "8px" }}>
-                  <span style={{ color: "#6B7A8C", fontSize: "11px", display: "block", marginBottom: "4px" }}>Avg Response</span>
-                  <span style={{ color: "white", fontSize: "16px", fontWeight: "600" }}>{selectedAgent.avgResponseTime}</span>
-                </div>
-              </div>
 
-              <h5 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" }}>Capabilities</h5>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "20px" }}>
-                {selectedAgent.capabilities.map((cap, i) => (
-                  <span key={i} style={{ padding: "5px 10px", backgroundColor: "#0A1628", borderRadius: "6px", color: "#B8C5D3", fontSize: "12px" }}>
-                    {cap}
-                  </span>
-                ))}
-              </div>
+                <h5 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" }}>Capabilities</h5>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "20px" }}>
+                  {selectedAgent.capabilities.map((cap, i) => (
+                    <span key={i} style={{ padding: "5px 10px", backgroundColor: "#0A1628", borderRadius: "6px", color: "#B8C5D3", fontSize: "12px" }}>
+                      {cap}
+                    </span>
+                  ))}
+                </div>
 
-              <h5 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" }}>Triggers Downstream Processes</h5>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {selectedAgent.downstreamProcesses.map((procId) => {
-                  const proc = selectedCompany?.processes.find((p) => p.id === procId);
-                  if (!proc) return null;
-                  return (
-                    <div
-                      key={procId}
-                      onClick={() => {
-                        setSelectedProcess(proc);
-                        setActiveTab("processes");
-                      }}
-                      style={{
-                        padding: "10px 14px",
-                        backgroundColor: "#0A1628",
-                        borderRadius: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        cursor: "pointer",
-                        border: "1px solid #2A3A4D",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <Workflow size={16} style={{ color: getProcessTypeColor(proc.type) }} />
-                        <span style={{ color: "#B8C5D3", fontSize: "13px" }}>{proc.name}</span>
+                <h5 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" }}>Triggers Downstream Processes</h5>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {selectedAgent.downstreamProcesses.map((procId) => {
+                    const proc = selectedCompany?.processes.find((p) => p.id === procId);
+                    if (!proc) return null;
+                    return (
+                      <div
+                        key={procId}
+                        onClick={() => {
+                          setSelectedProcess(proc);
+                          setActiveTab("processes");
+                        }}
+                        style={{
+                          padding: "10px 14px",
+                          backgroundColor: "#0A1628",
+                          borderRadius: "8px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          cursor: "pointer",
+                          border: "1px solid #2A3A4D",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <Workflow size={16} style={{ color: getProcessTypeColor(proc.type) }} />
+                          <span style={{ color: "#B8C5D3", fontSize: "13px" }}>{proc.name}</span>
+                        </div>
+                        <ChevronRight size={16} style={{ color: "#6B7A8C" }} />
                       </div>
-                      <ChevronRight size={16} style={{ color: "#6B7A8C" }} />
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", minHeight: "300px", color: "#6B7A8C" }}>
-              <Bot size={40} style={{ marginBottom: "12px", opacity: 0.5 }} />
-              <p style={{ fontSize: "14px" }}>Select an agent to view details</p>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", minHeight: "300px", color: "#6B7A8C" }}>
+                <Bot size={40} style={{ marginBottom: "12px", opacity: 0.5 }} />
+                <p style={{ fontSize: "14px" }}>Select an agent to view details</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ML Models Section */}
@@ -469,10 +529,10 @@ export default function RegulatoryPage() {
               >
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "8px" }}>
                   <h5 style={{ color: "#F1C40F", fontSize: "13px", fontWeight: "600", margin: 0 }}>{model.name}</h5>
-                  <span style={{ 
-                    padding: "2px 8px", 
-                    borderRadius: "4px", 
-                    fontSize: "10px", 
+                  <span style={{
+                    padding: "2px 8px",
+                    borderRadius: "4px",
+                    fontSize: "10px",
                     fontWeight: "600",
                     backgroundColor: "rgba(46, 204, 113, 0.15)",
                     color: "#2ECC71"
@@ -698,7 +758,6 @@ export default function RegulatoryPage() {
   const getRiskCategoryIcon = (category: RiskCategory): LucideIcon => {
     const icons: Record<RiskCategory, LucideIcon> = {
       compliance: ShieldCheck,
-      legal: Scale,
       operational: Settings,
       strategic: Target,
       reputational: Users,
@@ -732,86 +791,150 @@ export default function RegulatoryPage() {
       );
     };
 
+    const riskByCategoryBgStyle: React.CSSProperties = {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      borderRadius: viewMode === "view2" ? "0px" : "10px",
+      clipPath: viewMode === "view2" ? "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)" : "none",
+      WebkitClipPath: viewMode === "view2" ? "polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)" : "none",
+      backgroundColor: viewMode === "view2" ? v2Colors.bgCard : "#162032",
+      border: viewMode === "view2" ? `1px solid ${v2Colors.border}` : "1px solid #2A3A4D",
+      background: viewMode === "view2" ? v2Colors.bgCardGradient : undefined,
+      zIndex: 0,
+    };
+
     return (
       <div>
         {/* Top Row: Summary Cards + Heat Map */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "220px 1fr", gap: "12px", marginBottom: "12px" }}>
-          {/* Left Column: Summary Cards */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {/* Total Risks Card */}
-            <div style={{ backgroundColor: "#162032", padding: "12px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                  <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "4px" }}>Total Active Risks</div>
-                  <span style={{ color: "white", fontSize: "24px", fontWeight: "700" }}>{riskProfile.activeRisks}</span>
-                </div>
-                <div style={{ width: "36px", height: "36px", borderRadius: "8px", backgroundColor: "rgba(52, 152, 219, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Shield size={18} style={{ color: "#3498DB" }} />
-                </div>
-              </div>
-            </div>
-
-            {/* High & Critical Risks Card */}
-            <div style={{ backgroundColor: "#162032", padding: "12px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                  <div style={{ color: "#6B7A8C", fontSize: "11px", marginBottom: "4px" }}>High & Critical</div>
-                  <span style={{ color: "#E74C3C", fontSize: "24px", fontWeight: "700" }}>{riskProfile.highCriticalRisks}</span>
-                  <span style={{ color: "#E74C3C", fontSize: "11px", marginLeft: "6px" }}>({riskProfile.criticalRisks} critical)</span>
-                </div>
-                <div style={{ width: "36px", height: "36px", borderRadius: "8px", backgroundColor: "rgba(231, 76, 60, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <AlertTriangle size={18} style={{ color: "#E74C3C" }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Top Risk Categories - All Categories */}
-            <div style={{ backgroundColor: "#162032", padding: "12px", borderRadius: "10px", border: "1px solid #2A3A4D", flex: 1 }}>
-              <div style={{ color: "white", fontSize: "12px", fontWeight: "600", marginBottom: "8px" }}>Risk by Category</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                {(Object.entries(riskProfile.risksByCategory) as [RiskCategory, { count: number; high: number; critical: number }][])
-                  .sort((a, b) => b[1].count - a[1].count)
-                  .map(([category, data]) => {
-                    const config = riskCategoryConfig[category];
-                    return (
-                      <div key={category} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "3px 0" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <span style={{
-                            display: "inline-flex",
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "280px 1fr", gap: "12px", marginBottom: "12px" }}>
+          {/* Left Column: Risk by Category (enlarged) */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", position: "relative", zIndex: 10 }}>
+            {/* Risk by Category - Enlarged */}
+            <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column" }}>
+              <div style={riskByCategoryBgStyle} />
+              <div style={{ position: "relative", padding: "16px", flex: 1, display: "flex", flexDirection: "column", zIndex: 1 }}>
+                <div style={getTextStyle({ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" })}>Risk by Category</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {(Object.entries(riskProfile.risksByCategory) as [RiskCategory, { count: number; high: number; critical: number }][])
+                    .sort((a, b) => b[1].count - a[1].count)
+                    .map(([category, data]) => {
+                      const config = riskCategoryConfig[category];
+                      const isHovered = hoveredCategory === category;
+                      return (
+                        <div
+                          key={category}
+                          onMouseEnter={() => setHoveredCategory(category)}
+                          onMouseLeave={() => setHoveredCategory(null)}
+                          style={{
+                            display: "flex",
                             alignItems: "center",
-                            justifyContent: "center",
-                            width: "20px",
-                            height: "20px",
-                            borderRadius: "4px",
-                            backgroundColor: `${config.color}20`,
-                            color: config.color,
-                            fontSize: "9px",
-                            fontWeight: "700",
-                          }}>
-                            {config.abbr}
-                          </span>
-                          <span style={{ color: data.count > 0 ? "#B8C5D3" : "#6B7A8C", fontSize: "10px" }}>{config.label}</span>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                          <span style={{ color: data.count > 0 ? "white" : "#6B7A8C", fontSize: "12px", fontWeight: "600", minWidth: "16px", textAlign: "right" }}>{data.count}</span>
-                          {(data.critical > 0 || data.high > 0) ? (
-                            <span style={{ padding: "2px 4px", borderRadius: "4px", backgroundColor: "rgba(231, 76, 60, 0.15)", color: "#E74C3C", fontSize: "9px", fontWeight: "600", minWidth: "18px", textAlign: "center" }}>
-                              {data.critical + data.high}
+                            justifyContent: "space-between",
+                            padding: "8px 10px",
+                            cursor: "pointer",
+                            borderRadius: "8px",
+                            backgroundColor: isHovered ? (viewMode === "view2" ? `${config.color}25` : `${config.color}15`) : "transparent",
+                            border: isHovered ? (viewMode === "view2" ? `1px solid ${config.color}` : `1px solid ${config.color}40`) : "1px solid transparent",
+                            transition: "all 0.2s ease",
+                            transform: isHovered ? "scale(1.02)" : "scale(1)",
+                            position: "relative",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <span style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: "28px",
+                              height: "28px",
+                              borderRadius: "6px",
+                              backgroundColor: `${config.color}20`,
+                              color: config.color,
+                              fontSize: "11px",
+                              fontWeight: "700",
+                            }}>
+                              {config.abbr}
                             </span>
-                          ) : (
-                            <span style={{ minWidth: "18px" }}></span>
+                            <span style={{ color: isHovered ? "white" : (data.count > 0 ? "#B8C5D3" : "#6B7A8C"), fontSize: "13px", fontWeight: isHovered ? "500" : "400" }}>{config.label}</span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ color: data.count > 0 ? "white" : "#6B7A8C", fontSize: "16px", fontWeight: "600", minWidth: "24px", textAlign: "right" }}>{data.count}</span>
+                            {(data.critical > 0 || data.high > 0) ? (
+                              <span style={{ padding: "3px 6px", borderRadius: "4px", backgroundColor: "rgba(231, 76, 60, 0.15)", color: "#E74C3C", fontSize: "11px", fontWeight: "600", minWidth: "24px", textAlign: "center" }}>
+                                {data.critical + data.high}
+                              </span>
+                            ) : (
+                              <span style={{ minWidth: "24px" }}></span>
+                            )}
+                          </div>
+                          {/* Tooltip - positioned relative to this row */}
+                          {isHovered && (
+                            <div style={{
+                              position: "absolute",
+                              left: "100%",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              marginLeft: "12px",
+                              backgroundColor: viewMode === "view2" ? v2Colors.bgCard : "#1A2738",
+                              border: `1px solid ${viewMode === "view2" ? v2Colors.border : `${config.color}40`}`,
+                              borderRadius: viewMode === "view2" ? "0" : "10px",
+                              padding: "14px 16px",
+                              width: "280px",
+                              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.4)",
+                              zIndex: 9999,
+                              clipPath: viewMode === "view2" ? "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)" : "none",
+                              WebkitClipPath: viewMode === "view2" ? "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)" : "none",
+                            }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                                <span style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  width: "32px",
+                                  height: "32px",
+                                  borderRadius: viewMode === "view2" ? "0" : "8px",
+                                  clipPath: viewMode === "view2" ? "polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)" : "none",
+                                  backgroundColor: `${config.color}20`,
+                                  color: config.color,
+                                  fontSize: "13px",
+                                  fontWeight: "700",
+                                }}>
+                                  {config.abbr}
+                                </span>
+                                <span style={getTextStyle({
+                                  color: viewMode === "view2" ? v2Colors.text : "white",
+                                  fontSize: "14px",
+                                  fontWeight: "600",
+                                  textTransform: viewMode === "view2" ? "uppercase" : "none",
+                                  letterSpacing: viewMode === "view2" ? "1px" : "0"
+                                })}>
+                                  {config.label}
+                                </span>
+                              </div>
+                              <p style={getTextStyle({
+                                color: viewMode === "view2" ? v2Colors.textMuted : "#B8C5D3",
+                                fontSize: "13px",
+                                lineHeight: "1.5",
+                                margin: 0,
+                                textTransform: viewMode === "view2" ? "uppercase" : "none"
+                              })}>
+                                {config.description}
+                              </p>
+                            </div>
                           )}
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Right Column: Heat Map */}
-          <div style={{ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D", display: "flex", flexDirection: "column" }}>
-            <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "12px" }}>Risk Heat Map</h4>
+          <div style={getCardStyle({ backgroundColor: "#162032", padding: "16px", borderRadius: "10px", border: "1px solid #2A3A4D", display: "flex", flexDirection: "column" })}>
+            <h4 style={getTextStyle({ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "12px" })}>Risk Heat Map</h4>
             <div style={{ display: "grid", gridTemplateColumns: "70px repeat(5, 1fr)", gap: "6px", flex: 1 }}>
               {/* Header row */}
               <div></div>
@@ -833,9 +956,9 @@ export default function RegulatoryPage() {
                     // Critical = extreme + severe
                     // High = (extreme + major) OR (high + major)
                     const isCritical = likelihood === 'extreme' && severity === 'severe';
-                    const isHigh = (likelihood === 'extreme' && severity === 'major') || 
-                                   (likelihood === 'high' && severity === 'major');
-                    
+                    const isHigh = (likelihood === 'extreme' && severity === 'major') ||
+                      (likelihood === 'high' && severity === 'major');
+
                     // Color: Red for critical/high, otherwise use severity color
                     let cellColor = severityConfig[severity].color;
                     if (isCritical) {
@@ -843,241 +966,296 @@ export default function RegulatoryPage() {
                     } else if (isHigh) {
                       cellColor = '#EF4444'; // Red for high
                     }
-                    
+
+                    // Get alternating clipPath for View 2
+                    const rowIdx = likelihoods.indexOf(likelihood);
+                    const colIdx = severities.indexOf(severity);
+                    const isAlternate = (rowIdx + colIdx) % 2 === 0;
+                    const clipPath1 = "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)"; // top-left/bottom-right
+                    const clipPath2 = "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))"; // top-right/bottom-left
+
                     return (
                       <div
                         key={`${likelihood}-${severity}`}
                         style={{
-                          backgroundColor: cellData ? cellColor : "#1A2738",
-                          borderRadius: "6px",
+                          position: "relative",
                           padding: "8px 6px",
-                          textAlign: "center",
                           minHeight: "44px",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           flexWrap: "wrap",
                           gap: "4px",
-                          border: cellData ? "none" : "1px solid #2A3A4D",
                         }}
                       >
-                        {cellData && cellData.categories && (
-                          Object.entries(cellData.categories).map(([cat, catCount]) => {
-                            const catConfig = riskCategoryConfig[cat as RiskCategory];
-                            const isHovered = hoveredCell?.likelihood === likelihood && 
-                                             hoveredCell?.severity === severity && 
-                                             hoveredCell?.category === cat;
-                            
-                            // Get risks matching this cell
-                            const matchingRisks = riskProfile.risks.filter(
-                              r => r.category === cat && r.likelihood === likelihood && r.severity === severity
-                            );
-                            
-                            return (
-                              <div
-                                key={cat}
-                                style={{ position: "relative" }}
-                                onMouseEnter={() => setHoveredCell({ likelihood, severity, category: cat as RiskCategory })}
-                                onMouseLeave={(e) => {
-                                  // Check if we're moving to the tooltip
-                                  const relatedTarget = e.relatedTarget as HTMLElement;
-                                  if (relatedTarget?.closest?.('[data-tooltip="true"]')) {
-                                    return;
-                                  }
-                                  setHoveredCell(null);
-                                }}
-                              >
-                                <span
-                                  style={{
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    padding: "2px 4px",
-                                    color: "white",
-                                    fontSize: "12px",
-                                    fontWeight: "700",
-                                    whiteSpace: "nowrap",
-                                    cursor: "pointer",
-                                    textDecoration: isHovered ? "underline" : "none",
+                        {/* Background Layer - Clipped */}
+                        <div style={{
+                          position: "absolute",
+                          inset: 0,
+                          backgroundColor: cellData ? cellColor : (viewMode === "view2" ? "#0A0A0A" : "#1A2738"),
+                          borderRadius: viewMode === "view2" ? "0" : "6px",
+                          clipPath: viewMode === "view2" ? (isAlternate ? clipPath1 : clipPath2) : "none",
+                          border: cellData ? "none" : (viewMode === "view2" ? "1px solid #1A1A1A" : "1px solid #2A3A4D"),
+                          zIndex: 0,
+                        }} />
+
+                        {/* Content Layer - Unclipped */}
+                        <div style={{ position: "relative", zIndex: 1, display: "flex", flexWrap: "wrap", gap: "4px", justifyContent: "center" }}>
+                          {cellData && cellData.categories && (
+                            Object.entries(cellData.categories).map(([cat, catCount]) => {
+                              const catConfig = riskCategoryConfig[cat as RiskCategory];
+                              const isHovered = hoveredCell?.likelihood === likelihood &&
+                                hoveredCell?.severity === severity &&
+                                hoveredCell?.category === cat;
+
+                              // Get risks matching this cell
+                              const matchingRisks = riskProfile.risks.filter(
+                                r => r.category === cat && r.likelihood === likelihood && r.severity === severity
+                              );
+
+                              return (
+                                <div
+                                  key={cat}
+                                  style={{ position: "relative" }}
+                                  onMouseEnter={() => setHoveredCell({ likelihood, severity, category: cat as RiskCategory })}
+                                  onMouseLeave={(e) => {
+                                    // Check if we're moving to the tooltip
+                                    const relatedTarget = e.relatedTarget as HTMLElement;
+                                    if (relatedTarget?.closest?.('[data-tooltip="true"]')) {
+                                      return;
+                                    }
+                                    setHoveredCell(null);
                                   }}
                                 >
-                                  {catConfig.abbr}({catCount})
-                                </span>
-                                
-                                {/* Tooltip */}
-                                {isHovered && (
-                                  <div
-                                    data-tooltip="true"
-                                    onMouseEnter={() => setHoveredCell({ likelihood, severity, category: cat as RiskCategory })}
-                                    onMouseLeave={() => setHoveredCell(null)}
+                                  <span
                                     style={{
-                                      position: "absolute",
-                                      top: "calc(100% - 4px)",
-                                      left: "50%",
-                                      transform: "translateX(-50%)",
-                                      zIndex: 100,
-                                      backgroundColor: "#1A2738",
-                                      border: "1px solid #3498DB",
-                                      borderRadius: "8px",
-                                      padding: "12px",
-                                      minWidth: "260px",
-                                      boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-                                      paddingTop: "16px",
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      padding: "2px 4px",
+                                      color: "white",
+                                      fontSize: "12px",
+                                      fontWeight: "700",
+                                      whiteSpace: "nowrap",
+                                      cursor: "pointer",
+                                      textDecoration: isHovered ? "underline" : "none",
                                     }}
-                                    onClick={(e) => e.stopPropagation()}
                                   >
-                                    {/* Arrow pointer */}
-                                    <div style={{
-                                      position: "absolute",
-                                      top: "-6px",
-                                      left: "50%",
-                                      width: "12px",
-                                      height: "12px",
-                                      backgroundColor: "#1A2738",
-                                      border: "1px solid #3498DB",
-                                      borderRight: "none",
-                                      borderBottom: "none",
-                                      transform: "translateX(-50%) rotate(45deg)",
-                                    }} />
-                                    
-                                    <div style={{ 
-                                      display: "flex", 
-                                      alignItems: "center", 
-                                      gap: "8px", 
-                                      marginBottom: "10px",
-                                      paddingBottom: "8px",
-                                      borderBottom: "1px solid #2A3A4D"
-                                    }}>
-                                      <span style={{
-                                        display: "inline-flex",
+                                    {catConfig.abbr}({catCount})
+                                  </span>
+
+                                  {/* Tooltip */}
+                                  {isHovered && (
+                                    <div
+                                      data-tooltip="true"
+                                      onMouseEnter={() => setHoveredCell({ likelihood, severity, category: cat as RiskCategory })}
+                                      onMouseLeave={() => setHoveredCell(null)}
+                                      style={{
+                                        position: "absolute",
+                                        top: "calc(100% + 8px)",
+                                        left: "50%",
+                                        transform: "translateX(-50%)",
+                                        zIndex: 9999,
+                                        backgroundColor: viewMode === "view2" ? v2Colors.bgCard : "#1A2738",
+                                        border: `1px solid ${viewMode === "view2" ? v2Colors.border : "#3498DB"}`,
+                                        borderRadius: viewMode === "view2" ? "0" : "8px",
+                                        padding: "12px",
+                                        minWidth: "260px",
+                                        boxShadow: "0 8px 16px rgba(0, 0, 0, 0.5)",
+                                        clipPath: viewMode === "view2" ? "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)" : "none",
+                                        WebkitClipPath: viewMode === "view2" ? "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)" : "none",
+                                      }}
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {/* Arrow pointer removed for cleaner View 2 look and consistency */}
+
+                                      <div style={{
+                                        display: "flex",
                                         alignItems: "center",
-                                        justifyContent: "center",
-                                        width: "24px",
-                                        height: "24px",
-                                        borderRadius: "4px",
-                                        backgroundColor: `${catConfig.color}20`,
-                                        color: catConfig.color,
-                                        fontSize: "10px",
-                                        fontWeight: "700",
+                                        gap: "8px",
+                                        marginBottom: "10px",
+                                        paddingBottom: "8px",
+                                        borderBottom: `1px solid ${viewMode === "view2" ? "#2A3A4D" : "#3498DB"}`,
                                       }}>
-                                        {catConfig.abbr}
-                                      </span>
-                                      <span style={{ color: "white", fontSize: "13px", fontWeight: "600" }}>
-                                        {catConfig.label} Risks ({catCount})
-                                      </span>
-                                    </div>
-                                    
-                                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                                      {matchingRisks.length > 0 ? (
-                                        matchingRisks.map((risk) => (
-                                          <div
-                                            key={risk.id}
-                                            onClick={() => {
-                                              setSelectedRisk(risk);
-                                              setHoveredCell(null);
-                                            }}
-                                            style={{
-                                              padding: "10px 12px",
-                                              backgroundColor: "#0A1628",
-                                              borderRadius: "6px",
-                                              cursor: "pointer",
-                                              border: "1px solid #2A3A4D",
-                                              transition: "all 0.2s ease",
-                                            }}
-                                            onMouseOver={(e) => {
-                                              e.currentTarget.style.borderColor = catConfig.color;
-                                              e.currentTarget.style.backgroundColor = "#162032";
-                                            }}
-                                            onMouseOut={(e) => {
-                                              e.currentTarget.style.borderColor = "#2A3A4D";
-                                              e.currentTarget.style.backgroundColor = "#0A1628";
-                                            }}
-                                          >
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                                              <span style={{ color: "#3498DB", fontSize: "11px", fontWeight: "600" }}>{risk.id}</span>
-                                              <span style={{ 
-                                                padding: "2px 6px", 
-                                                borderRadius: "4px", 
-                                                backgroundColor: `${getScoreColor(risk.score)}20`,
-                                                color: getScoreColor(risk.score),
-                                                fontSize: "10px",
-                                                fontWeight: "600"
-                                              }}>
-                                                {risk.score}
-                                              </span>
+                                        <span style={{
+                                          display: "inline-flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          width: "24px",
+                                          height: "24px",
+                                          borderRadius: viewMode === "view2" ? "0" : "4px",
+                                          clipPath: viewMode === "view2" ? "polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)" : "none",
+                                          backgroundColor: `${catConfig.color}20`,
+                                          color: catConfig.color,
+                                          fontSize: "10px",
+                                          fontWeight: "700",
+                                        }}>
+                                          {catConfig.abbr}
+                                        </span>
+                                        <span style={getTextStyle({
+                                          color: viewMode === "view2" ? v2Colors.text : "white",
+                                          fontSize: "13px",
+                                          fontWeight: "600",
+                                          textTransform: viewMode === "view2" ? "uppercase" : "none"
+                                        })}>
+                                          {catConfig.label} Risks ({catCount})
+                                        </span>
+                                      </div>
+
+                                      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                        {matchingRisks.length > 0 ? (
+                                          matchingRisks.map((risk) => (
+                                            <div
+                                              key={risk.id}
+                                              onClick={() => {
+                                                setSelectedRisk(risk);
+                                                setHoveredCell(null);
+                                              }}
+                                              style={{
+                                                padding: "10px 12px",
+                                                backgroundColor: "#0A1628",
+                                                borderRadius: "6px",
+                                                cursor: "pointer",
+                                                border: "1px solid #2A3A4D",
+                                                transition: "all 0.2s ease",
+                                              }}
+                                              onMouseOver={(e) => {
+                                                e.currentTarget.style.borderColor = catConfig.color;
+                                                e.currentTarget.style.backgroundColor = "#162032";
+                                              }}
+                                              onMouseOut={(e) => {
+                                                e.currentTarget.style.borderColor = "#2A3A4D";
+                                                e.currentTarget.style.backgroundColor = "#0A1628";
+                                              }}
+                                            >
+                                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                                                <span style={{ color: "#3498DB", fontSize: "11px", fontWeight: "600" }}>{risk.id}</span>
+                                                <span style={{
+                                                  padding: "2px 6px",
+                                                  borderRadius: "4px",
+                                                  backgroundColor: `${getScoreColor(risk.score)}20`,
+                                                  color: getScoreColor(risk.score),
+                                                  fontSize: "10px",
+                                                  fontWeight: "600"
+                                                }}>
+                                                  {risk.score}
+                                                </span>
+                                              </div>
+                                              <p style={{ color: "#B8C5D3", fontSize: "11px", margin: 0, lineHeight: "1.4" }}>
+                                                {risk.description}
+                                              </p>
                                             </div>
-                                            <p style={{ color: "#B8C5D3", fontSize: "11px", margin: 0, lineHeight: "1.4" }}>
-                                              {risk.description}
-                                            </p>
-                                          </div>
-                                        ))
-                                      ) : (
-                                        <p style={{ color: "#6B7A8C", fontSize: "11px", margin: 0, fontStyle: "italic" }}>
-                                          {catCount} risk(s) in this category
-                                        </p>
-                                      )}
+                                          ))
+                                        ) : (
+                                          <p style={{ color: "#6B7A8C", fontSize: "11px", margin: 0, fontStyle: "italic" }}>
+                                            {catCount} risk(s) in this category
+                                          </p>
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })
-                        )}
+                                  )}
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
                       </div>
                     );
                   })}
                 </>
               ))}
             </div>
+
+
           </div>
         </div>
 
-        {/* Second Row: KRIs + Alerts */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-          {/* Key Risk Indicators */}
-          <div style={{ backgroundColor: "#162032", padding: "14px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" }}>Key Risk Indicators (KRIs)</h4>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px" }}>
-              {riskProfile.kris.map((kri) => {
-                const TrendIcon = kri.trend === 'up' ? TrendingUp : kri.trend === 'down' ? TrendingDown : Minus;
-                const trendColor = kri.trend === 'up' ? '#E74C3C' : kri.trend === 'down' ? '#2ECC71' : '#6B7A8C';
-                return (
-                  <div key={kri.id} style={{ backgroundColor: "#0A1628", padding: "10px", borderRadius: "6px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "4px" }}>
-                      <div style={{
-                        width: "20px",
-                        height: "20px",
-                        borderRadius: "4px",
-                        backgroundColor: kri.status === 'critical' ? "rgba(231, 76, 60, 0.15)" : kri.status === 'warning' ? "rgba(241, 196, 15, 0.15)" : "rgba(46, 204, 113, 0.15)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}>
-                        {kri.status === 'critical' ? (
-                          <AlertCircle size={12} style={{ color: "#E74C3C" }} />
-                        ) : kri.status === 'warning' ? (
-                          <AlertTriangle size={12} style={{ color: "#F1C40F" }} />
-                        ) : (
-                          <CheckCircle size={12} style={{ color: "#2ECC71" }} />
-                        )}
-                      </div>
-                      <span style={{ color: "white", fontSize: "15px", fontWeight: "700" }}>{kri.value}{kri.unit}</span>
-                      {kri.trendPercent > 0 && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "1px" }}>
-                          <TrendIcon size={10} style={{ color: trendColor }} />
-                          <span style={{ color: trendColor, fontSize: "10px" }}>{kri.trendPercent}%</span>
-                        </div>
-                      )}
-                    </div>
-                    <div style={{ color: "#6B7A8C", fontSize: "10px" }}>{kri.name}</div>
-                  </div>
-                );
-              })}
-            </div>
+        {/* Question Bar - ChatGPT Style */}
+        <div style={{
+          marginBottom: "12px",
+          padding: "16px",
+          backgroundColor: viewMode === "view2" ? "#0A0A0A" : "#1A2738",
+          borderRadius: viewMode === "view2" ? "0" : "10px",
+          border: `1px solid ${viewMode === "view2" ? "#2A3A4D" : "#2A3A4D"}`,
+          clipPath: viewMode === "view2" ? "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)" : "none",
+        }}>
+          <div style={{ position: "relative", marginBottom: "12px" }}>
+            <input
+              type="text"
+              placeholder="Ask about regulatory risks, errors, or mitigation..."
+              style={{
+                width: "100%",
+                padding: "12px 48px 12px 14px",
+                borderRadius: viewMode === "view2" ? "0" : "6px",
+                backgroundColor: viewMode === "view2" ? "#162032" : "#0A1628",
+                border: "1px solid #2A3A4D",
+                color: "white",
+                fontSize: "13px",
+                outline: "none",
+                fontFamily: viewMode === "view2" ? "Orbitron, sans-serif" : "Inter, sans-serif",
+                letterSpacing: viewMode === "view2" ? "1px" : "0",
+                transition: "border-color 0.2s",
+              }}
+              onFocus={(e) => e.target.style.borderColor = "#3498DB"}
+              onBlur={(e) => e.target.style.borderColor = "#2A3A4D"}
+            />
+            <button style={{
+              position: "absolute",
+              right: "8px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#3498DB",
+              padding: "6px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "4px",
+              transition: "background 0.2s",
+            }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = "rgba(52, 152, 219, 0.1)"}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+            <span style={{ color: "#6B7A8C", fontSize: "11px", fontWeight: "600" }}>Try asking:</span>
+            {["Show High Risks", "Explain Compliance Score", "Mitigation Strategies"].map((faq) => (
+              <span
+                key={faq}
+                style={{
+                  padding: "4px 10px",
+                  backgroundColor: viewMode === "view2" ? "rgba(52, 152, 219, 0.1)" : "#2A3A4D",
+                  borderRadius: viewMode === "view2" ? "0" : "4px",
+                  color: viewMode === "view2" ? "#3498DB" : "#B8C5D3",
+                  fontSize: "11px",
+                  cursor: "pointer",
+                  border: viewMode === "view2" ? "1px solid rgba(52, 152, 219, 0.3)" : "none",
+                  clipPath: viewMode === "view2" ? "polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)" : "none",
+                  transition: "all 0.2s",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = viewMode === "view2" ? "rgba(52, 152, 219, 0.2)" : "#3e4c60";
+                  e.currentTarget.style.color = "white";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = viewMode === "view2" ? "rgba(52, 152, 219, 0.1)" : "#2A3A4D";
+                  e.currentTarget.style.color = viewMode === "view2" ? "#3498DB" : "#B8C5D3";
+                }}
+              >
+                {faq}
+              </span>
+            ))}
+          </div>
+        </div>
 
-          {/* Recent Alerts */}
-          <div style={{ backgroundColor: "#162032", padding: "14px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" }}>Recent Risk Trends & Alerts</h4>
+        {/* Second Row: Alerts Only (KRIs moved primarily to top) */}
+        <div style={{ marginBottom: "12px" }}>
+          {/* Recent Alerts - Full Width */}
+          <div style={getCardStyle({ backgroundColor: "#162032", padding: "14px", borderRadius: "10px", border: "1px solid #2A3A4D" })}>
+            <h4 style={getTextStyle({ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" })}>Recent Risk Trends & Alerts</h4>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {riskProfile.recentAlerts.map((alert) => (
                 <div key={alert.id} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
@@ -1094,9 +1272,9 @@ export default function RegulatoryPage() {
         {/* Third Row: Risk Table + Insights */}
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1.6fr 1fr", gap: "12px" }}>
           {/* Top Risks Table */}
-          <div style={{ backgroundColor: "#162032", padding: "14px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
+          <div style={getCardStyle({ backgroundColor: "#162032", padding: "14px", borderRadius: "10px", border: "1px solid #2A3A4D" })}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-              <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", margin: 0 }}>Risk Register</h4>
+              <h4 style={getTextStyle({ color: "white", fontSize: "13px", fontWeight: "600", margin: 0 })}>Risk Register</h4>
               <span style={{ color: "#00D4AA", fontSize: "10px", cursor: "pointer" }}>VIEW ALL</span>
             </div>
 
@@ -1150,8 +1328,8 @@ export default function RegulatoryPage() {
           </div>
 
           {/* ERM Insights - Single Card */}
-          <div style={{ backgroundColor: "#162032", padding: "14px", borderRadius: "10px", border: "1px solid #2A3A4D" }}>
-            <h4 style={{ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" }}>ERM Insights & Recommendations</h4>
+          <div style={getCardStyle({ backgroundColor: "#162032", padding: "14px", borderRadius: "10px", border: "1px solid #2A3A4D" })}>
+            <h4 style={getTextStyle({ color: "white", fontSize: "13px", fontWeight: "600", marginBottom: "10px" })}>ERM Insights & Recommendations</h4>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {riskProfile.ermInsights.map((insight) => (
                 <div key={insight.id} style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
@@ -1169,9 +1347,9 @@ export default function RegulatoryPage() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", backgroundColor: "#0A1628" }}>
+    <main style={{ minHeight: "100vh", backgroundColor: getPageBgColor(), fontFamily: viewMode === "view2" ? "'Orbitron', sans-serif" : "inherit" }}>
       {/* Header */}
-      <header style={{ position: "sticky", top: 0, zIndex: 50, backgroundColor: "#0A1628", borderBottom: "1px solid #2A3A4D" }}>
+      <header style={{ position: "sticky", top: 0, zIndex: 50, backgroundColor: getPageBgColor(), borderBottom: `1px solid ${viewMode === "view2" ? v2Colors.border : "#2A3A4D"}` }}>
         <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "10px 12px" : "12px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "8px" : "16px" }}>
@@ -1185,12 +1363,53 @@ export default function RegulatoryPage() {
                   <Shield size={isMobile ? 16 : 20} style={{ color: "#E74C3C" }} />
                 </div>
                 <div>
-                  <h1 style={{ fontSize: isMobile ? "14px" : "18px", fontWeight: "600", color: "white", margin: 0 }}>
-                    {isMobile ? "Compliance" : "Regulatory Compliance"}
+                  <h1 style={{ fontSize: isMobile ? "14px" : "18px", fontWeight: "600", color: "white", margin: 0, fontFamily: viewMode === "view2" ? "'Orbitron', 'Rajdhani', sans-serif" : "inherit", letterSpacing: viewMode === "view2" ? "2px" : "0", textTransform: viewMode === "view2" ? "uppercase" : "none" }}>
+                    {isMobile ? "ERM" : "Enterprise Risk Management"}
                   </h1>
-                  {!isMobile && <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0 }}>AI-powered compliance automation</p>}
+                  {!isMobile && <p style={{ fontSize: "12px", color: "#6B7A8C", margin: 0, fontFamily: viewMode === "view2" ? "'Orbitron', 'Rajdhani', sans-serif" : "inherit", letterSpacing: viewMode === "view2" ? "1px" : "0" }}>AI-powered risk intelligence</p>}
                 </div>
               </div>
+              {/* View Toggle Buttons */}
+              {!isMobile && (
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "24px" }}>
+                  <button
+                    onClick={() => setViewMode("view1")}
+                    style={{
+                      padding: "6px 14px",
+                      borderRadius: "6px",
+                      backgroundColor: viewMode === "view1" ? "#3498DB" : "transparent",
+                      border: viewMode === "view1" ? "1px solid #3498DB" : "1px solid #2A3A4D",
+                      color: viewMode === "view1" ? "white" : "#6B7A8C",
+                      fontSize: "12px",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    View 1
+                  </button>
+                  <button
+                    onClick={() => setViewMode("view2")}
+                    style={{
+                      padding: "6px 14px",
+                      borderRadius: viewMode === "view2" ? "0" : "6px",
+                      clipPath: viewMode === "view2" ? "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" : "none",
+                      backgroundColor: viewMode === "view2" ? "#E74C3C" : "transparent",
+                      border: viewMode === "view2" ? "1px solid #E74C3C" : "1px solid #2A3A4D",
+                      color: viewMode === "view2" ? "white" : "#6B7A8C",
+                      fontSize: "12px",
+                      fontWeight: "500",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      fontFamily: viewMode === "view2" ? "'Orbitron', 'Rajdhani', sans-serif" : "inherit",
+                      letterSpacing: viewMode === "view2" ? "1px" : "0",
+                      textTransform: viewMode === "view2" ? "uppercase" : "none",
+                    }}
+                  >
+                    View 2
+                  </button>
+                </div>
+              )}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               {isMobile && (
@@ -1269,67 +1488,92 @@ export default function RegulatoryPage() {
 
       <div style={{ maxWidth: "1800px", margin: "0 auto", padding: isMobile ? "12px" : "24px" }}>
         {/* Global Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(3, 1fr)" : "repeat(6, 1fr)", gap: isMobile ? "8px" : "16px", marginBottom: isMobile ? "16px" : "24px" }}>
-          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
-              <Building2 size={isMobile ? 14 : 18} style={{ color: "#00D4AA" }} />
-              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Companies</span>
-            </div>
-            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.totalCompanies}</div>
-          </div>
-          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
-              <Bot size={isMobile ? 14 : 18} style={{ color: "#3498DB" }} />
-              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>AI Agents</span>
-            </div>
-            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.totalAgents}</div>
-          </div>
-          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
-              <Workflow size={isMobile ? 14 : 18} style={{ color: "#9B59B6" }} />
-              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Processes</span>
-            </div>
-            <div style={{ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.totalProcesses}</div>
-          </div>
-          <div style={{ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "6px" : "10px", marginBottom: isMobile ? "6px" : "10px" }}>
-              <Shield size={isMobile ? 14 : 18} style={{ color: "#2ECC71" }} />
-              <span style={{ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px" }}>Avg Score</span>
-            </div>
-            <div style={{ color: "#2ECC71", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" }}>{globalStats.avgComplianceScore}</div>
-          </div>
-          {!isMobile && (
-            <>
-              <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-                  <Zap size={18} style={{ color: "#F1C40F" }} />
-                  <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Automation</span>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(5, 1fr)", gap: isMobile ? "8px" : "16px", marginBottom: isMobile ? "16px" : "24px" }}>
+          {getRiskProfile(selectedCompany?.id || '')?.kris.map((kri) => {
+            const TrendIcon = kri.trend === 'up' ? TrendingUp : kri.trend === 'down' ? TrendingDown : Minus;
+            const trendColor = kri.trend === 'up' ? '#E74C3C' : kri.trend === 'down' ? '#2ECC71' : '#6B7A8C';
+
+            return (
+              <div
+                key={kri.id}
+                style={{ position: "relative", cursor: "pointer" }}
+                onMouseEnter={() => setHoveredKriId(kri.id)}
+                onMouseLeave={() => setHoveredKriId(null)}
+              >
+                {/* Visual Card Content - Clipped in View 2 */}
+                <div style={getCardStyle({ backgroundColor: "#1A2738", padding: isMobile ? "12px" : "18px", borderRadius: "12px", border: "1px solid #2A3A4D", height: "100%" })}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+                    <div style={{
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: viewMode === "view2" ? "0" : "6px",
+                      clipPath: viewMode === "view2" ? "polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)" : "none",
+                      backgroundColor: kri.status === 'critical' ? "rgba(231, 76, 60, 0.15)" : kri.status === 'warning' ? "rgba(241, 196, 15, 0.15)" : "rgba(46, 204, 113, 0.15)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}>
+                      {kri.status === 'critical' ? (
+                        <AlertCircle size={14} style={{ color: "#E74C3C" }} />
+                      ) : kri.status === 'warning' ? (
+                        <AlertTriangle size={14} style={{ color: "#F1C40F" }} />
+                      ) : (
+                        <CheckCircle size={14} style={{ color: "#2ECC71" }} />
+                      )}
+                    </div>
+                    <span style={getTextStyle({ color: "#6B7A8C", fontSize: isMobile ? "10px" : "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" })}>{kri.name}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div style={getNumberStyle({ color: "white", fontSize: isMobile ? "18px" : "26px", fontWeight: "700" })}>{kri.value}{kri.unit}</div>
+                    {kri.trendPercent > 0 && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "2px", backgroundColor: `${trendColor}15`, padding: "2px 6px", borderRadius: viewMode === "view2" ? "0" : "4px", clipPath: viewMode === "view2" ? "polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px)" : "none" }}>
+                        <TrendIcon size={12} style={{ color: trendColor }} />
+                        <span style={getTextStyle({ color: trendColor, fontSize: "11px", fontWeight: "600" })}>{kri.trendPercent}%</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{globalStats.avgAutomation}%</div>
+
+                {/* Tooltip - Outside clipped container */}
+                {hoveredKriId === kri.id && kri.description && (
+                  <div style={{
+                    position: "absolute",
+                    top: "calc(100% + 8px)",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    backgroundColor: viewMode === "view2" ? v2Colors.bgCard : "#1A2738",
+                    border: `1px solid ${viewMode === "view2" ? v2Colors.border : "#2A3A4D"}`,
+                    padding: "12px",
+                    borderRadius: viewMode === "view2" ? "0px" : "8px",
+                    zIndex: 9999,
+                    width: "240px",
+                    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.5)",
+                    pointerEvents: "none",
+                    clipPath: viewMode === "view2" ? "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)" : "none",
+                    WebkitClipPath: viewMode === "view2" ? "polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)" : "none",
+                  }}>
+                    <div style={getTextStyle({ color: viewMode === "view2" ? v2Colors.text : "#E0E6ED", fontSize: "12px", lineHeight: "1.5", textAlign: "left" })}>
+                      {kri.description}
+                    </div>
+                  </div>
+                )}
               </div>
-              <div style={{ backgroundColor: "#1A2738", padding: "18px", borderRadius: "12px", border: "1px solid #2A3A4D" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-                  <FileText size={18} style={{ color: "#E67E22" }} />
-                  <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Monthly Docs</span>
-                </div>
-                <div style={{ color: "white", fontSize: "26px", fontWeight: "700" }}>{(globalStats.totalDocuments / 1000).toFixed(0)}K</div>
-              </div>
-            </>
-          )}
+            );
+          })}
         </div>
 
-        {/* Main Layout */}
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "280px 1fr", gap: isMobile ? "12px" : "24px" }}>
-          {/* Company Sidebar - Hidden on mobile */}
-          {!isMobile && (
+        {/* Main Layout - Full width for demo, no sidebar */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: isMobile ? "12px" : "24px" }}>
+          {/* Company Sidebar - Hidden for demo */}
+          {/* {!isMobile && (
             <div>
               <h3 style={{ color: "white", fontSize: "14px", fontWeight: "600", marginBottom: "12px" }}>Companies</h3>
               {renderCompanyList()}
             </div>
-          )}
+          )} */}
 
           {/* Main Content */}
-          <div style={{ backgroundColor: "#1A2738", borderRadius: "12px", border: "1px solid #2A3A4D", overflow: "hidden" }}>
+          <div style={getCardStyle({ backgroundColor: "#1A2738", borderRadius: "12px", border: "1px solid #2A3A4D", overflow: "hidden" })}>
             {/* Mobile Company Selector */}
             {isMobile && (
               <div style={{ padding: "12px 16px", borderBottom: "1px solid #2A3A4D" }}>
@@ -1385,23 +1629,54 @@ export default function RegulatoryPage() {
                     )}
                   </div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Overall Score</span>
-                  <div
-                    style={{
-                      width: isMobile ? "42px" : "56px",
-                      height: isMobile ? "42px" : "56px",
-                      borderRadius: "50%",
-                      backgroundColor: selectedCompany.overallComplianceScore >= 90 ? "rgba(46, 204, 113, 0.15)" : "rgba(241, 196, 15, 0.15)",
-                      border: `2px solid ${selectedCompany.overallComplianceScore >= 90 ? "#2ECC71" : "#F1C40F"}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <span style={{ color: selectedCompany.overallComplianceScore >= 90 ? "#2ECC71" : "#F1C40F", fontSize: "20px", fontWeight: "700" }}>
-                      {selectedCompany.overallComplianceScore}
-                    </span>
+                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                  {/* Total Active Risks */}
+                  {(() => {
+                    const riskProfile = getRiskProfile(selectedCompany.id);
+                    return riskProfile ? (
+                      <>
+                        <div style={getCardStyle({ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", backgroundColor: "#162032", borderRadius: "8px", border: "1px solid #2A3A4D" })}>
+                          <div>
+                            <div style={getTextStyle({ color: "#6B7A8C", fontSize: "10px", marginBottom: "2px" })}>Total Active Risks</div>
+                            <span style={getNumberStyle({ color: "white", fontSize: "20px", fontWeight: "700" })}>{riskProfile.activeRisks}</span>
+                          </div>
+                          <div style={{ width: "28px", height: "28px", borderRadius: viewMode === "view2" ? "0" : "6px", clipPath: viewMode === "view2" ? "polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)" : "none", backgroundColor: "rgba(52, 152, 219, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <Shield size={14} style={{ color: "#3498DB" }} />
+                          </div>
+                        </div>
+                        {/* High & Critical */}
+                        <div style={getCardStyle({ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", backgroundColor: "#162032", borderRadius: "8px", border: "1px solid #2A3A4D" })}>
+                          <div>
+                            <div style={getTextStyle({ color: "#6B7A8C", fontSize: "10px", marginBottom: "2px" })}>High & Critical</div>
+                            <span style={getNumberStyle({ color: "#E74C3C", fontSize: "20px", fontWeight: "700" })}>{riskProfile.highCriticalRisks}</span>
+                            <span style={getTextStyle({ color: "#E74C3C", fontSize: "10px", marginLeft: "4px" })}>({riskProfile.criticalRisks} critical)</span>
+                          </div>
+                          <div style={{ width: "28px", height: "28px", borderRadius: viewMode === "view2" ? "0" : "6px", clipPath: viewMode === "view2" ? "polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)" : "none", backgroundColor: "rgba(231, 76, 60, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <AlertTriangle size={14} style={{ color: "#E74C3C" }} />
+                          </div>
+                        </div>
+                      </>
+                    ) : null;
+                  })()}
+                  {/* Overall Score */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ color: "#6B7A8C", fontSize: "12px" }}>Overall Score</span>
+                    <div
+                      style={{
+                        width: isMobile ? "42px" : "56px",
+                        height: isMobile ? "42px" : "56px",
+                        borderRadius: "50%",
+                        backgroundColor: selectedCompany.overallComplianceScore >= 90 ? "rgba(46, 204, 113, 0.15)" : "rgba(241, 196, 15, 0.15)",
+                        border: `2px solid ${selectedCompany.overallComplianceScore >= 90 ? "#2ECC71" : "#F1C40F"}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <span style={{ color: selectedCompany.overallComplianceScore >= 90 ? "#2ECC71" : "#F1C40F", fontSize: "20px", fontWeight: "700" }}>
+                        {selectedCompany.overallComplianceScore}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1414,13 +1689,10 @@ export default function RegulatoryPage() {
               padding: isMobile ? "0 8px" : "0 24px",
               overflowX: isMobile ? "auto" : "visible",
             }}>
-              {(["risks", "agents", "processes", "frameworks", "summary"] as const).map((tab) => {
+              {/* Demo mode: Only show Risks tab */}
+              {(["risks"] as const).map((tab) => {
                 const tabLabels: Record<string, string> = {
-                  risks: "Risks",
-                  agents: "Agents + Models",
-                  processes: "Processes",
-                  frameworks: "Frameworks",
-                  summary: "Summary",
+                  risks: "Risk Overview",
                 };
                 return (
                   <button
